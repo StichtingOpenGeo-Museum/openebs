@@ -1,0 +1,9 @@
+class EffectType:
+	ONBEKEND = 0
+	ALGEMEEN_EFFECT = 1
+	ONGEDEFINIEERD = 255
+
+class SubEffectType:
+	ONBEKEND = '0'
+	MINDER_VERVOER = '11'
+	# TODO

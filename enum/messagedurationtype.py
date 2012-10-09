@@ -1,0 +1,4 @@
+class MessageDurationType:
+	REMOVE = 'REMOVE'
+	FIRSTVEJO = 'FIRSTVEJO'
+	ENDTIME = 'ENDTIME'

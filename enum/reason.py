@@ -1,0 +1,11 @@
+class ReasonType:
+	ONBEKEND = 0
+	OVERIG = 1
+	PERSONEEL = 2
+	MATERIEEL = 3
+	OMGEVING = 4
+	ONGEDEFINIEERD = 255
+
+class SubReasonType:
+	# TODO
+	ONBEKEND = '255'

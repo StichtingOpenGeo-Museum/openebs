@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tmi8:VV_TM_PUSH xsi:schemaLocation="http://bison.connekt.nl/tmi8/kv15/msg kv15-msg.xsd" xmlns:tmi8c="http://bison.connekt.nl/tmi8/kv15/core" xmlns:tmi8="http://bison.connekt.nl/tmi8/kv15/msg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <tmi8:SubscriberID>openOV</tmi8:SubscriberID>
+        <tmi8:Version>8.1.0.0</tmi8:Version>
+        <tmi8:DossierName>KV15messages</tmi8:DossierName>
+        <tmi8:Timestamp>2001-12-17T09:30:47.0Z</tmi8:Timestamp>
+        <tmi8:KV15messages>
+		<tmi8:STOPMESSAGE>
+			<tmi8:dataownercode>VTN</tmi8:dataownercode>
+			<tmi8:messagecodedate>2010-02-11</tmi8:messagecodedate>
+			<tmi8:messagecodenumber>0</tmi8:messagecodenumber>
+			<tmi8:userstopcodes>
+				<tmi8:userstopcode>1234567890</tmi8:userstopcode>
+				<tmi8:userstopcode>1234567890</tmi8:userstopcode>
+			</tmi8:userstopcodes>
+			<tmi8:messagepriority>CALAMITY</tmi8:messagepriority>
+			<tmi8:messagetype>GENERAL</tmi8:messagetype>
+			<tmi8:messagedurationtype>REMOVE</tmi8:messagedurationtype>
+			<tmi8:messagestarttime>2001-12-17T09:30:47.0Z</tmi8:messagestarttime>
+			<tmi8:messageendtime>2001-12-17T09:30:47.0Z</tmi8:messageendtime>
+			<tmi8:messagecontent>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</tmi8:messagecontent>
+			<tmi8:reasontype>0</tmi8:reasontype>
+			<tmi8:subreasontype>0</tmi8:subreasontype>
+			<tmi8:reasoncontent>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</tmi8:reasoncontent>
+			<tmi8:effecttype>0</tmi8:effecttype>
+			<tmi8:subeffecttype>0</tmi8:subeffecttype>
+			<tmi8:effectcontent>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</tmi8:effectcontent>
+			<tmi8:measuretype>0</tmi8:measuretype>
+			<tmi8:submeasuretype>0</tmi8:submeasuretype>
+			<tmi8:measurecontent>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</tmi8:measurecontent>
+			<tmi8:advicetype>0</tmi8:advicetype>
+			<tmi8:subadvicetype>0</tmi8:subadvicetype>
+			<tmi8:advicecontent>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</tmi8:advicecontent>
+			<tmi8:messagetimestamp>2001-12-17T09:30:47.0Z</tmi8:messagetimestamp>
+			<tmi8c:delimiter since="in de toekomst"/>
+			<tmi8:nieuwveldvoorSTOPMESSAGE/>
+		</tmi8:STOPMESSAGE>
+        </tmi8:KV15messages>
+</tmi8:VV_TM_PUSH>
