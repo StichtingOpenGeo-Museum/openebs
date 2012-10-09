@@ -1,6 +1,6 @@
 from datetime import datetime
 from httplib import HTTPConnection
-from const import debug
+from settings.const import debug
 
 class Push:
 	def __init__(self, subscriberid = 'openOV', dossiername = None, content = None):
