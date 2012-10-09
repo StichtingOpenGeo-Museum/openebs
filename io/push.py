@@ -18,7 +18,7 @@ class Push:
 
 		xml = """<tmi8:VV_TM_PUSH xsi:schemaLocation="http://bison.connekt.nl/tmi8/kv15/msg kv15-msg.xsd" xmlns:tmi8c="http://bison.connekt.nl/tmi8/kv15/core" xmlns:tmi8="http://bison.connekt.nl/tmi8/kv15/msg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tmi8:SubscriberID>%(subscriberid)s</tmi8:SubscriberID>
-	<tmi8:Version>8.1.0.0</tmi8:Version>
+	<tmi8:Version>8.1.0.1</tmi8:Version>
 	<tmi8:DossierName>%(dossiername)s</tmi8:DossierName>
 	<tmi8:Timestamp>%(timestamp)s</tmi8:Timestamp>
 %(content)s
