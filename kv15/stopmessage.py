@@ -15,13 +15,23 @@ from enum.measure import SubMeasureType
 from enum.advice import AdviceType
 from enum.advice import SubAdviceType
 
+from settings.const import database_connect
+
 class StopMessage():
+	def __next_mesagecodenumber(self):
+		try:
+			conn = psycopg2.connect(database_connect)
+			cur = conn.cursor()
+			cur.execute("""SELECT nextval('messagecodenumber');""")
+			return cur.fetchall()[0][0]
+		except:
+			return None
+
 	def __init__(self, dataownercode='openOV', messagecontent=None, userstopcodes=None):
-		self.subscriberid = 'openOV'		
 
 		self.dataownercode = dataownercode
 		self.messagecodedate = date.today()
-		self.messagecodenumber = 0
+		self.messagecodenumber = self.__next_messagecodenumber()
 
 		if userstopcodes is None:
 			self.userstopcodes = []
