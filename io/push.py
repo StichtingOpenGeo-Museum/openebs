@@ -1,6 +1,6 @@
 from datetime import datetime
 from httplib import HTTPConnection
-from settings.const import debug
+from settings.const import debug, send
 
 class Push:
 	def __init__(self, subscriberid = 'openOV', dossiername = None, content = None):
@@ -31,10 +31,15 @@ class Push:
 		if debug:
 			print content
 
-		conn = HTTPConnection(remote)
-		conn.request("POST", path, content, {"Content-type": "application/xml"})
-		response = conn.getresponse()
-		data = response.read()
-		conn.close()
+		if send:
+			conn = HTTPConnection(remote)
+			conn.request("POST", path, content, {"Content-type": "application/xml"})
+			response = conn.getresponse()
+			data = response.read()
+			conn.close()
+			if debug:
+				print data
 
-		return data
+			return data
+		
+		return None
