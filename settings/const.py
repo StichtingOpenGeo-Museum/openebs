@@ -1,2 +1,3 @@
 debug = True
-remote = 'localhost'
+send = False
+remote = 'drisacc.transmodel.nl'
