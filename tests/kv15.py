@@ -35,12 +35,12 @@ msg.messagetype = MessageType.GENERAL
 msg.mesagedurationtype = MessageDurationType.REMOVE
 msg.messagestarttime = datetime.combine(date.today(), time(XX, 05))
 kv15 = KV15messages(stopmessages = [msg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 waitforit(datetime.combine(date.today(), time(XX, 10)))
 delmsg = msg.delete()
 kv15 = KV15messages(stopmessages = [delmsg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 
 # GENERAL
@@ -53,7 +53,7 @@ msg.mesagedurationtype = MessageDurationType.ENDTIME
 msg.messagestarttime = datetime.combine(date.today(), time(XX, 05))
 msg.messageendtime = datetime.combine(date.today(), time(XX, 20))
 kv15 = KV15messages(stopmessages = [msg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 waitforit(datetime.combine(date.today(), time(XX, 20)))
 
@@ -64,12 +64,12 @@ msg.mesagedurationtype = MessageDurationType.ENDTIME
 msg.messagestarttime = datetime.combine(date.today(), time(XX, 05))
 msg.messageendtime = datetime.combine(date.today(), time(XX, 35))
 kv15 = KV15messages(stopmessages = [msg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 waitforit(datetime.combine(date.today(), time(XX, 30)))
 delmsg = msg.delete()
 kv15 = KV15messages(stopmessages = [delmsg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 
 # GENERAL
@@ -82,7 +82,7 @@ msg.mesagedurationtype = MessageDurationType.FIRSTVEJO
 msg.messagestarttime = datetime.combine(date.today(), time(XX, 05))
 msg.messageendtime = datetime.combine(date.today(), time(XX, 37))
 kv15 = KV15messages(stopmessages = [msg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 
 waitforit(datetime.combine(date.today(), time(XX, 45)))
@@ -91,12 +91,12 @@ msg.messagetype = MessageType.GENERAL
 msg.mesagedurationtype = MessageDurationType.FIRSTVEJO
 msg.messagestarttime = datetime.combine(date.today(), time(XX, 05))
 kv15 = KV15messages(stopmessages = [msg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 waitforit(datetime.combine(date.today(), time(XX, 46)))
 delmsg = msg.delete()
 kv15 = KV15messages(stopmessages = [delmsg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 
 # OVERRULE
@@ -108,12 +108,12 @@ msg.messagetype = MessageType.OVERRULE
 msg.mesagedurationtype = MessageDurationType.REMOVE
 msg.messagestarttime = datetime.combine(date.today(), time(XX, 05))
 kv15 = KV15messages(stopmessages = [msg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 waitforit(datetime.combine(date.today(), time(XX, 55)))
 delmsg = msg.delete()
 kv15 = KV15messages(stopmessages = [delmsg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 
 # OVERRULE
@@ -126,7 +126,7 @@ msg.mesagedurationtype = MessageDurationType.ENDTIME
 msg.messagestarttime = datetime.combine(date.today(), time(XX, 05))
 msg.messageendtime = datetime.combine(date.today(), time(YY, 05))
 kv15 = KV15messages(stopmessages = [msg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 waitforit(datetime.combine(date.today(), time(YY, 05)))
 
@@ -137,12 +137,12 @@ msg.mesagedurationtype = MessageDurationType.ENDTIME
 msg.messagestarttime = datetime.combine(date.today(), time(XX, 05))
 msg.messageendtime = datetime.combine(date.today(), time(YY, 20))
 kv15 = KV15messages(stopmessages = [msg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 waitforit(datetime.combine(date.today(), time(YY, 15)))
 delmsg = msg.delete()
 kv15 = KV15messages(stopmessages = [delmsg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 
 # OVERRULE
@@ -155,7 +155,7 @@ msg.mesagedurationtype = MessageDurationType.FIRSTVEJO
 msg.messagestarttime = datetime.combine(date.today(), time(XX, 05))
 msg.messageendtime = datetime.combine(date.today(), time(YY, 22))
 kv15 = KV15messages(stopmessages = [msg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 
 waitforit(datetime.combine(date.today(), time(YY, 30)))
@@ -164,12 +164,12 @@ msg.messagetype = MessageType.OVERRULE
 msg.mesagedurationtype = MessageDurationType.FIRSTVEJO
 msg.messagestarttime = datetime.combine(date.today(), time(XX, 05))
 kv15 = KV15messages(stopmessages = [msg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 waitforit(datetime.combine(date.today(), time(YY, 31)))
 delmsg = msg.delete()
 kv15 = KV15messages(stopmessages = [delmsg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 
 # Overigen
@@ -180,7 +180,7 @@ msg.messagetype = MessageType.BOTTOMLINE
 msg.mesagedurationtype = MessageDurationType.FIRSTVEJO
 msg.messagestarttime = datetime.combine(date.today(), time(XX, 05))
 kv15 = KV15messages(stopmessages = [msg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 
 # Lange vrijetekst met een tekst van
@@ -192,12 +192,12 @@ msg.messagetype = MessageType.GENERAL
 msg.mesagedurationtype = MessageDurationType.REMOVE
 msg.messagestarttime = datetime.combine(date.today(), time(XX, 05))
 kv15 = KV15messages(stopmessages = [msg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 waitforit(datetime.combine(date.today(), time(YY, 45)))
 delmsg = msg.delete()
 kv15 = KV15messages(stopmessages = [delmsg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 
 waitforit(datetime.combine(date.today(), time(YY, 50)))
@@ -206,16 +206,16 @@ msg.messagetype = MessageType.OVERRULE
 msg.mesagedurationtype = MessageDurationType.REMOVE
 msg.messagestarttime = datetime.combine(date.today(), time(XX, 05))
 kv15 = KV15messages(stopmessages = [msg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 waitforit(datetime.combine(date.today(), time(YY, 55)))
 delmsg = msg.delete()
 kv15 = KV15messages(stopmessages = [delmsg])
-kv15.push(remote, '/KV15')
+kv15.push(remote, '/TMI_Post/KV15')
 
 
 
 
 #kv15 = KV15messages(stopmessages=[StopMessage(userstopcodes=['0000123', '1234000'], messagecontent='Hoi Joost'), StopMessage(userstopcodes=['1000123', '1234001'], messagecontent='Hoi Thomas')])
 #kv15 = KV15messages(stopmessages=[StopMessage(userstopcodes=['0000123', '1234000'], messagecontent='Hoi Joost'), StopMessage(userstopcodes=['1000123', '1234001'], messagecontent='Hoi Thomas')])
-#kv15.push(remote, '/KV15')
+#kv15.push(remote, '/TMI_Post/KV15')
