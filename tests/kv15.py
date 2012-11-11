@@ -175,7 +175,7 @@ kv15.push(remote, '/TMI_Post/KV15')
 # Overigen
 
 waitforit(datetime.combine(date.today(), time(YY, 35)))
-msg = StopMessage(userstopcodes=['42028501'], messagecontent='OVERRULE FIRSTVEJO')
+msg = StopMessage(userstopcodes=['42028501'], messagecontent='Overigen')
 msg.messagetype = MessageType.BOTTOMLINE
 msg.mesagedurationtype = MessageDurationType.FIRSTVEJO
 msg.messagestarttime = datetime.combine(date.today(), time(XX, 05))
