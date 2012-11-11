@@ -3,6 +3,8 @@ from datetime import time
 from datetime import datetime
 from datetime import timedelta
 
+from xml.sax.saxutils import escape
+
 from enum.messagepriority import MessagePriority
 from enum.messagetype import MessageType
 from enum.messagedurationtype import MessageDurationType
@@ -15,23 +17,33 @@ from enum.measure import SubMeasureType
 from enum.advice import AdviceType
 from enum.advice import SubAdviceType
 
-from settings.const import database_connect
+from kv15.deletemessage import DeleteMessage
+
+#from settings.const import database_connect
 
 class StopMessage():
-	def __next_mesagecodenumber(self):
+	def _next_messagecodenumber(self):
 		try:
-			conn = psycopg2.connect(database_connect)
-			cur = conn.cursor()
-			cur.execute("""SELECT nextval('messagecodenumber');""")
-			return cur.fetchall()[0][0]
+			serial = int(open('/tmp/serial.txt', 'r').read()) + 1
 		except:
-			return None
+			serial = 0
+
+		open('/tmp/serial.txt', 'w').write(str(serial))
+
+		return serial
+#		try:
+#			conn = psycopg2.connect(database_connect)
+#			cur = conn.cursor()
+#			cur.execute("""SELECT nextval('messagecodenumber');""")
+#			return cur.fetchall()[0][0]
+#		except:
+#			return None
 
 	def __init__(self, dataownercode='openOV', messagecontent=None, userstopcodes=None):
 
 		self.dataownercode = dataownercode
 		self.messagecodedate = date.today()
-		self.messagecodenumber = self.__next_messagecodenumber()
+		self.messagecodenumber = self._next_messagecodenumber()
 
 		if userstopcodes is None:
 			self.userstopcodes = []
@@ -69,6 +81,9 @@ class StopMessage():
 		self.messagetimestamp = datetime.now()
 	
 	def __str__(self):
+		if len(self.userstopcodes) == 0:
+			raise NameError('UserStopCodes == 0')
+
 		data = {'dataownercode': self.dataownercode,
 			'messagetimestamp': self.messagetimestamp.replace(microsecond=0).isoformat(),
 			'messagecodedate': self.messagecodedate,
@@ -78,19 +93,19 @@ class StopMessage():
 			'messagedurationtype': self.messagedurationtype,
 			'messagestarttime': self.messagestarttime.replace(microsecond=0).isoformat(),
 			'messageendtime': self.messageendtime.replace(microsecond=0).isoformat(),
-			'messagecontent': self.messagecontent,
+			'messagecontent': escape(self.messagecontent),
 			'reasontype': self.reasontype,
 			'subreasontype': self.subreasontype,
-			'reasoncontent': self.reasoncontent,
+			'reasoncontent': escape(self.reasoncontent),
 			'effecttype': self.effecttype,
 			'subeffecttype': self.subeffecttype,
-			'effectcontent': self.effectcontent,
+			'effectcontent': escape(self.effectcontent),
 			'measuretype': self.measuretype,
 			'submeasuretype': self.submeasuretype,
-			'measurecontent': self.measurecontent,
+			'measurecontent': escape(self.measurecontent),
 			'advicetype': self.advicetype,
 			'subadvicetype': self.subadvicetype,
-			'advicecontent': self.advicecontent}
+			'advicecontent': escape(self.advicecontent)}
 
 		xml = """		<tmi8:STOPMESSAGE>
 			<tmi8:dataownercode>%(dataownercode)s</tmi8:dataownercode>
@@ -134,4 +149,5 @@ class StopMessage():
 
 		return xml
 
-
+	def delete(self):
+		return DeleteMessage(dataownercode = self.dataownercode, messagecodedate = self.messagecodedate, messagecodenumber = self.messagecodenumber)
