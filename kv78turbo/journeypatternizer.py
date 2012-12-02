@@ -3,7 +3,7 @@
 import psycopg2
 from datetime import date
 
-conn = psycopg2.connect("dbname=kv78turbo1")
+conn = psycopg2.connect("dbname=kv78turbo")
 cur = conn.cursor()
 
 def getJourneyPatternPriority(operationdate, dataownercode, lineplanningnumber):
@@ -56,26 +56,39 @@ def alignJourneyPatterns(operationdate, dataownercode, lineplanningnumber):
     if len(patterns[0]) == 3:
         return [(x[0]) for x in patterns]
 
-    max_one = None
-    max_two = None
+    #for x in patterns:
+    #    print x[0:3], x[3:6]
+
     order = 0;
 
     final = {}
     todo = {}
     output = []
 
+    last_two = None
     for pattern in patterns:
         order += 1
-        max_one = max(max_one, pattern[1])
-        max_two = max(max_two, pattern[4])
-        expect_two = None
 
         if pattern[0] and pattern[3]:
             final[order] = ([pattern[0:3], pattern[3:6]])
-            last_two = int(pattern[4] - 1)
+            if last_two is None and order > 1:
+                last_two = int(pattern[4] - 1)
+                for y in range(1, order):
+                    final[order - y][1] = (last_two + y)
+            else: 
+                if last_two is not None and int(pattern[4]) > last_two:
+                    y = 1
+                    while type(final[order - y][1]) is int and final[order - y][1] <= pattern[4]:
+                        final[order - y][1] = None
+                        y += 1
+
+                last_two = int(pattern[4] - 1)
+
         elif pattern[0]:
             final[order] = ([pattern[0:3], last_two])
-            last_two -= 1
+            if last_two is not None:
+                last_two -= 1
+
         elif pattern[0] is None:
             done = False
             for key, x in final.items():
@@ -87,36 +100,117 @@ def alignJourneyPatterns(operationdate, dataownercode, lineplanningnumber):
             if not done:
                 todo[int(pattern[4])] = pattern[3:6]
 
-    first = todo.keys()
-    for _key, x in final.items():
-        if len(first) > 0:
-            if type(x[1]) is int:
-                if x[1] < first[0]:
-                    output.append((None, todo[first[0]]))
-                    del todo[first[0]]
-                    first = todo.keys()
-            elif x[1][1] < first[0]:
-                output.append((None, todo[first[0]]))
-                del todo[first[0]]
-                first = todo.keys()
+    # There is a chance that the join resulted in multiple entries on the same stoparea
+    # We are going to prune these entries now.
 
-        if (type(x[1]) is int):
+    #for x in final.values():
+    #    print x[0], x[1]
+
+    last_key = None
+    last_one = None
+    last_two = None
+    for key, x in final.items():
+        if x[0] is not None:
+            this_one = x[0][1]
+            if last_one is not None:
+                if last_one == this_one:
+                    if last_key in final:
+                        # print last_two, x[1][1]
+                        if last_two is not None and final[last_key][1] is not None and final[last_key][1][1] > x[1][1]:
+                            redo = final.pop(key)[1]
+                        else:
+                            redo = final.pop(last_key)[1]
+                        if redo is not None:
+                            todo[redo[1]] = redo
+                    else:
+                        final.pop(key)
+    
+        if key in final and x[1] is not None:
+            if type(x[1]) is int:
+                final[key][1] = None
+            else:
+                this_two = x[1][1]
+                if last_two is not None:
+                    if last_two == 1:
+                        todo[this_two] = x[1]
+                        final[key][1] = None
+                        this_two = 1
+                    if last_two < this_two:
+                        todo[this_two] = x[1]
+                        final[key][1] = None
+                        this_two = last_two
+
+                last_two = this_two
+   
+        last_key = key
+        last_one = this_one 
+    #print '-'
+    #
+    #for x in final.values():
+    #    print x[0], x[1]
+
+
+    # first = sorted(todo.keys(), reverse=True)
+
+    remove = set([])
+    for x in final.values():
+        if x[1] is not None:
+            remove.add(x[1][1])
+
+    #print todo.keys()
+    #print remove
+    first = sorted(list(set(todo.keys()) - remove), reverse=True)
+    last_two = None
+    for x in final.values():
+        while len(first) > 0:
+            if (type(x[1]) is int and x[1] < first[0]) or (x[1] is not None and x[1][1] < first[0]):
+                item = first.pop(0)
+
+                if len(output) > 1 and output[-1][1] is None:
+                    output[-1] = (output[-1][0], todo.pop(item))
+                else:
+                    output.append((None, todo.pop(item)))
+
+            else:
+                break
+
+        if len(first) > 0 and len(output) > 0 and x[1] is None and output[-1][1] is not None and (output[-1][1][1] - 1) == first[0]:
+            item = first.pop(0)
+            output.append((x[0], todo.pop(item)))
+
+        elif len(output) > 1 and x[1] is None and output[-1][0] is None:
+            output[-1] = (x[0], output[-1][1])
+
+        elif type(x[1]) is int and x[1] in first:
+            output.append((x[0], todo.pop(x[1])))
+            last_one = x[1]
+
+        elif type(x[1]) is int:
             output.append((x[0], None))
 
         else:
             output.append((x[0], x[1]))
 
+    if len(first) > 0:
+        print first
+        printAligned(output)
+        sys.exit()
+
     return output
 
 def printAligned(aligned):
+    maxlen = 4
     if len(aligned[0]) == 2:
         for x, y in aligned:
             if x and y:
-                print x[0], '\t', y[0]
+                maxlen = max(len(x[0]), maxlen)
+                print x[1], '\t', x[0], '\t', y[0], y[1]
             elif x:
-                print x[0]
+                maxlen = max(len(x[0]), maxlen)
+                print x[1], '\t', x[0]
             elif y:
-                print '\t', y[0]
+                
+                print ''.join([' ']*maxlen), '\t', '\t', y[0], y[1]
     else:
         for x in aligned:
             print x
@@ -126,15 +220,16 @@ def showLines(date, dataownercode):
     lines = cur.fetchall()
 
     for lineplanningnumber, transporttype, linepublicnumber, linename in lines:
-        aligned = alignJourneyPatterns(date.today(), dataownercode, lineplanningnumber)
+            print transporttype, linepublicnumber, '-', linename, lineplanningnumber
+            aligned = alignJourneyPatterns(date.today(), dataownercode, lineplanningnumber)
 
-        print transporttype, linepublicnumber, '-', linename
-        if aligned is None:
-            print 'No pattern'
-        else:
-            printAligned(aligned)
+            if aligned is None:
+                print 'No pattern'
+            else:
+                printAligned(aligned)
 
 showLines(date.today(), 'HTM')
-
-
-# aligned = alignJourneyPatterns(date.today(), 'ARR', '16001')
+showLines(date.today(), 'ARR')
+showLines(date.today(), 'CXX')
+showLines(date.today(), 'VTN')
+#showLines(date.today(), 'GVB') Doesn't work yet, no stopareacodes defined
