@@ -126,7 +126,7 @@ def showLines(date, dataownercode):
     lines = cur.fetchall()
 
     for lineplanningnumber, transporttype, linepublicnumber, linename in lines:
-        aligned = alignJourneyPatterns(date.today(), 'HTM', lineplanningnumber)
+        aligned = alignJourneyPatterns(date.today(), dataownercode, lineplanningnumber)
 
         print transporttype, linepublicnumber, '-', linename
         if aligned is None:
