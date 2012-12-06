@@ -107,45 +107,45 @@ class StopMessage():
 			'subadvicetype': self.subadvicetype,
 			'advicecontent': escape(self.advicecontent)}
 
-		xml = """		<tmi8:STOPMESSAGE>
-			<tmi8:dataownercode>%(dataownercode)s</tmi8:dataownercode>
-			<tmi8:messagecodedate>%(messagecodedate)s</tmi8:messagecodedate>
-			<tmi8:messagecodenumber>%(messagecodenumber)d</tmi8:messagecodenumber>
-			<tmi8:userstopcodes>\n""" % data
+		xml = """		<STOPMESSAGE>
+			<dataownercode>%(dataownercode)s</dataownercode>
+			<messagecodedate>%(messagecodedate)s</messagecodedate>
+			<messagecodenumber>%(messagecodenumber)d</messagecodenumber>
+			<userstopcodes>\n""" % data
 
 		for userstopcode in self.userstopcodes:
-			xml += """				<tmi8:userstopcode>%(userstopcode)s</tmi8:userstopcode>\n""" % {'userstopcode': userstopcode}
+			xml += """				<userstopcode>%(userstopcode)s</userstopcode>\n""" % {'userstopcode': userstopcode}
 
-		xml += """			</tmi8:userstopcodes>
-			<tmi8:messagepriority>%(messagepriority)s</tmi8:messagepriority>
-			<tmi8:messagetype>%(messagetype)s</tmi8:messagetype>
-			<tmi8:messagedurationtype>%(messagedurationtype)s</tmi8:messagedurationtype>
-			<tmi8:messagestarttime>%(messagestarttime)s</tmi8:messagestarttime>
-			<tmi8:messageendtime>%(messageendtime)s</tmi8:messageendtime>
-			<tmi8:messagecontent>%(messagecontent)s</tmi8:messagecontent>\n""" % data
+		xml += """			</userstopcodes>
+			<messagepriority>%(messagepriority)s</messagepriority>
+			<messagetype>%(messagetype)s</messagetype>
+			<messagedurationtype>%(messagedurationtype)s</messagedurationtype>
+			<messagestarttime>%(messagestarttime)s</messagestarttime>
+			<messageendtime>%(messageendtime)s</messageendtime>
+			<messagecontent>%(messagecontent)s</messagecontent>\n""" % data
 
 		if self.reasontype != ReasonType.ONGEDEFINIEERD:
-			xml += """			<tmi8:reasontype>%(reasontype)s</tmi8:reasontype>
-				<tmi8:subreasontype>%(subreasontype)s</tmi8:subreasontype>
-				<tmi8:reasoncontent>%(reasoncontent)s</tmi8:reasoncontent>\n""" % data
+			xml += """			<reasontype>%(reasontype)s</reasontype>
+				<subreasontype>%(subreasontype)s</subreasontype>
+				<reasoncontent>%(reasoncontent)s</reasoncontent>\n""" % data
 
 		if self.effecttype != EffectType.ONGEDEFINIEERD:
-			xml += """			<tmi8:effecttype>%(effecttype)s</tmi8:effecttype>
-			<tmi8:subeffecttype>%(subeffecttype)s</tmi8:subeffecttype>
-			<tmi8:effectcontent>%(effectcontent)s</tmi8:effectcontent>\n""" % data
+			xml += """			<effecttype>%(effecttype)s</effecttype>
+			<subeffecttype>%(subeffecttype)s</subeffecttype>
+			<effectcontent>%(effectcontent)s</effectcontent>\n""" % data
 
 		if self.measuretype != MeasureType.ONGEDEFINIEERD:
-			"""			<tmi8:measuretype>%(measuretype)s</tmi8:measuretype>
-			<tmi8:submeasuretype>%(submeasuretype)s</tmi8:submeasuretype>
-			<tmi8:measurecontent>%(measurecontent)s</tmi8:measurecontent>\n""" % data
+			"""			<measuretype>%(measuretype)s</measuretype>
+			<submeasuretype>%(submeasuretype)s</submeasuretype>
+			<measurecontent>%(measurecontent)s</measurecontent>\n""" % data
 
 		if self.advicetype != AdviceType.ONGEDEFINIEERD:
-			"""			<tmi8:advicetype>%(advicetype)s</tmi8:advicetype>
-			<tmi8:subadvicetype>%(subadvicetype)s</tmi8:subadvicetype>
-			<tmi8:advicecontent>%(advicecontent)s</tmi8:advicecontent>\n""" % data
+			"""			<advicetype>%(advicetype)s</advicetype>
+			<subadvicetype>%(subadvicetype)s</subadvicetype>
+			<advicecontent>%(advicecontent)s</advicecontent>\n""" % data
 
-		xml += """			<tmi8:messagetimestamp>%(messagetimestamp)s</tmi8:messagetimestamp>
-		</tmi8:STOPMESSAGE>\n""" % data
+		xml += """			<messagetimestamp>%(messagetimestamp)s</messagetimestamp>
+		</STOPMESSAGE>\n""" % data
 
 		return xml
 

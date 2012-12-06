@@ -8,13 +8,13 @@ class KV15messages:
 			self.stopmessages = stopmessages
 	
 	def __str__(self):
-		xml = """	<tmi8:KV15messages>\n"""
+		xml = """	<KV15messages>\n"""
 		for stopmessage in self.stopmessages:
 			xml += str(stopmessage)
-		xml += """	</tmi8:KV15messages>"""
+		xml += """	</KV15messages>"""
 
 		return xml
 	
 	def push(self, remote, path):
-		return Push(dossiername='KV15messages', content = str(self)).push(remote, path)
+		return Push(dossiername='KV15messages', content = str(self), namespace='http://bison.connekt.nl/tmi8/kv15/msg').push(remote, path)
 

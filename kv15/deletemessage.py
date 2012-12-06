@@ -27,11 +27,11 @@ class DeleteMessage():
 			'messagecodedate': self.messagecodedate,
 			'messagecodenumber': self.messagecodenumber}
 
-		xml = """		<tmi8:DELETEMESSAGE>
-			<tmi8:dataownercode>%(dataownercode)s</tmi8:dataownercode>
-			<tmi8:messagecodedate>%(messagecodedate)s</tmi8:messagecodedate>
-			<tmi8:messagecodenumber>%(messagecodenumber)d</tmi8:messagecodenumber>
-		</tmi8:DELETEMESSAGE>\n""" % data
+		xml = """		<DELETEMESSAGE>
+			<dataownercode>%(dataownercode)s</dataownercode>
+			<messagecodedate>%(messagecodedate)s</messagecodedate>
+			<messagecodenumber>%(messagecodenumber)d</messagecodenumber>
+		</DELETEMESSAGE>\n""" % data
 
 		return xml
 
