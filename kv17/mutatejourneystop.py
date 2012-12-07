@@ -26,26 +26,26 @@ class MutateJourneyStop():
                 self.mutations = []
 
         def journeyxml(self):
-		return """\t<KV17cvlinfo>
-\t\t<KV17JOURNEY>
-\t\t\t\t<dataownercode>%s</dataownercode>
-\t\t\t\t<lineplanningnumber>%s</lineplanningnumber>
-\t\t\t\t<operatingday>%s</operatingday>
-\t\t\t\t<journeynumber>%d</journeynumber>
-\t\t\t\t<reinforcementnumber>%d</reinforcementnumber>
-\t\t</KV17JOURNEY>\n""" % (self.dataownercode,self.lineplanningnumber,self.operatingday,int(self.journeynumber),int(self.reinforcementnumber))
+		return """	<KV17cvlinfo>
+		<KV17JOURNEY>
+			<dataownercode>%s</dataownercode>
+			<lineplanningnumber>%s</lineplanningnumber>
+			<operatingday>%s</operatingday>
+			<journeynumber>%d</journeynumber>
+			<reinforcementnumber>%d</reinforcementnumber>
+		</KV17JOURNEY>\n""" % (self.dataownercode,self.lineplanningnumber,self.operatingday,int(self.journeynumber),int(self.reinforcementnumber))
 
 	def __str__(self):
-		xml = self.journeyxml() + '\t\t<KV17MUTATEJOURNEYSTOP>\n'
+		xml = self.journeyxml() + '		<KV17MUTATEJOURNEYSTOP>\n'
 		for mutation in self.mutations:
-			xml += '\t\t\t<%s>\n' % (mutation['type'])
+			xml += '		<%s>\n' % (mutation['type'])
 			for key,value in mutation.items():
 				if key == 'type':
 					continue
-				xml += '\t\t\t\t<%s>%s</%s>\n' % (key,value,key)
-			xml += '\t\t\t</%s>\n' % (mutation['type'])
-		xml += '\t\t</KV17MUTATEJOURNEYSTOP>\n'
-		return xml + '\t</KV17cvlinfo>'
+				xml += '			<%s>%s</%s>\n' % (key,value,key)
+			xml += '		</%s>\n' % (mutation['type'])
+		xml += '		</KV17MUTATEJOURNEYSTOP>\n'
+		return xml + '	</KV17cvlinfo>'
 
 	def push(self, remote, path):
 		return Push(dossiername='KV17cvlinfo', content = str(self), namespace='http://bison.connekt.nl/tmi8/kv17/msg').push(remote, path)
