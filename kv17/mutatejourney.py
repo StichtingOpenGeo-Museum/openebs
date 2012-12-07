@@ -1,6 +1,5 @@
 from datetime import datetime
 from xml.sax.saxutils import escape
-
 from enum.reason import ReasonType
 from enum.reason import SubReasonType
 from enum.advice import AdviceType
@@ -92,7 +91,7 @@ class MutateJourney():
 		self.mutations.append(mutation)
 		return self
 
-	def changepasstimes(self,userstopcode,targetarrivaltime,targetdeparturetime,journeystoptype,passagesequencenumber=0):
+	def changepasstimes(self,userstopcode,journeystoptype,targetarrivaltime,targetdeparturetime,passagesequencenumber=0):
                 mutation = {	'type' : 'CHANGEDESTINATION',
 				'userstopcode' : userstopcode,
 				'passagesequencenumber' : passagesequencenumber,
@@ -115,13 +114,15 @@ class MutateJourney():
 	def mutationmessage(self,userstopcode,passagesequencenumber=0):
                 mutation = {	'type' : 'MUTATIONMESSAGE',
 				'userstopcode' : userstopcode,
-				'passagesequencenumber' : passagesequencenumber,
-				'reasontype' : self.reasontype,
+				'passagesequencenumber' : passagesequencenumber}
+		if self.reasontype != ReasonType.ONGEDEFINIEERD:
+			mutation.update({'reasontype' : self.reasontype,
 				'subreasontype' : self.subreasontype,
-				'reasoncontent' : escape(self.reasoncontent),
-				'advicetype' : self.advicetype,
+				'reasoncontent' : escape(self.reasoncontent)})
+		if self.advicetype != AdviceType.ONGEDEFINIEERD:
+			mutation.update({'advicetype' : self.advicetype,
 				'subadvicetype' : self.subadvicetype,
-				'advicecontent' : escape(self.advicecontent)}
+				'advicecontent' : escape(self.advicecontent)})
 		self.mutations.append(mutation)
 		return self
 
