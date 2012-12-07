@@ -84,9 +84,9 @@ class MutateJourneyStop():
 				'passagesequencenumber' : passagesequencenumber,
 				'reasontype' : self.reasontype,
 				'subreasontype' : self.subreasontype,
-				'reasoncontent' : self.reasoncontent,
+				'reasoncontent' : escape(self.reasoncontent),
 				'advicetype' : self.advicetype,
 				'subadvicetype' : self.subadvicetype,
-				'advicecontent' : self.advicecontent}
+				'advicecontent' : escape(self.advicecontent)}
 		self.mutations.append(mutation)
 
