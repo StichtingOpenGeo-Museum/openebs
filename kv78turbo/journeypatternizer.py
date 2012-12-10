@@ -131,11 +131,13 @@ def alignJourneyPatterns(operationdate, dataownercode, lineplanningnumber):
             else:
                 this_two = x[1][1]
                 if last_two is not None:
-                    if last_two == 1:
+                    if last_two == this_two:
+                        final[key][1] = None
+                    elif last_two == 1:
                         todo[this_two] = x[1]
                         final[key][1] = None
                         this_two = 1
-                    if last_two < this_two:
+                    elif last_two < this_two:
                         todo[this_two] = x[1]
                         final[key][1] = None
                         this_two = last_two
@@ -191,6 +193,10 @@ def alignJourneyPatterns(operationdate, dataownercode, lineplanningnumber):
         else:
             output.append((x[0], x[1]))
 
+    while len(first) > 0:
+        item = first.pop(0)
+        output.append((None, todo.pop(item)))
+
     if len(first) > 0:
         print first
         printAligned(output)
@@ -214,22 +220,75 @@ def printAligned(aligned):
     else:
         for x in aligned:
             print x
-    
-def showLines(date, dataownercode):
+ 
+def printAligned2(aligned):
+    maxlen = 4
+    if len(aligned[0]) == 2:
+        for x, y in aligned:
+            if x and y:
+                maxlen = max(len(x[0]), maxlen)
+                print x[1], x[2], y[2], y[1]
+            elif x:
+                maxlen = max(len(x[0]), maxlen)
+                print x[1], x[2]
+            elif y:
+                
+                print ''.join([' ']*maxlen), '\t', '\t', y[2], y[1]
+    else:
+        for x in aligned:
+            print x
+
+def html(dataownercode, aligned):
+    cur.execute("SELECT userstopcode, timingpointname FROM usertimingpoint AS u, timingpoint AS t WHERE u.dataownercode = %s AND u.timingpointdataownercode = t.dataownercode AND u.timingpointcode = t.timingpointcode;", (dataownercode,))
+    stops = {}
+    for x in cur.fetchall():
+        stops[x[0]] = x[1]
+
+    if len(aligned[0]) == 2:
+        output = '<table class="lijn"><tr><th class="left"><button class="btn btn-success btn-mini" onclick="selecteer(0);"><i class="icon-arrow-down icon-white"></i></th><th><button class="btn btn-success btn-mini" onclick="selecteer(2);"><i class="icon-resize-horizontal icon-white"></i></th><th class="right"><button class="btn btn-success btn-mini" onclick="selecteer(1);"><i class="icon-arrow-up icon-white"></i></th></tr>'
+        for x, y in aligned:
+            #if (x[2] is not None and x[2] == y[2]) or (x[0] == y[0]) or (stops[x[0]] == stops[y[0]]):
+            if x is not None and y is not None:
+                output += '<tr><td class="left"><button type="button" data-toggle="button" class-toggle="btn-success" class="btn btn-primary btn-mini" id="%(userstopcode1)s">%(timingpointname1)s</button></td><td><button class="btn btn-success btn-mini" onclick="selecteerHaltes(this);"><i class="icon-resize-horizontal icon-white"></i></td><td class="right"><button type="button" data-toggle="button" class-toggle="btn-success" class="btn btn-primary btn-mini" id="%(userstopcode2)s">%(timingpointname2)s</button></td></tr>\n'%{'dataownercode': dataownercode, 'userstopcode1': x[0], 'timingpointname1': stops[x[0]], 'userstopcode2': y[0], 'timingpointname2': stops[y[0]]}
+            elif x is not None:
+                output += '<tr><td class="left"><button type="button" data-toggle="button" class-toggle="btn-success" class="btn btn-primary btn-mini" id="%(userstopcode1)s">%(timingpointname1)s</button></td><td></td><td></td></tr>\n'%{'dataownercode': dataownercode, 'userstopcode1': x[0], 'timingpointname1': stops[x[0]]}
+                
+            elif y is not None:
+                output += '<tr><td></td><td></td><td class="right"><button type="button" data-toggle="button" class-toggle="btn-success" class="btn btn-primary btn-mini" id="%(userstopcode2)s">%(timingpointname2)s</button></td></tr>\n'%{'dataownercode': dataownercode, 'userstopcode2': y[0], 'timingpointname2': stops[y[0]]}
+        output += '</table>'
+
+        return output
+    else:
+        return '<table class="lijn"><tr><th class="left"><button class="btn btn-success btn-mini" onclick="selecteer(0);"><i class="icon-arrow-down icon-white"></i></th></tr>'+''.join(['<tr><td class="left"><button type="button" data-toggle="button" class-toggle="btn-success" class="btn btn-primary btn-mini" id="%s_%s">%s</button></td></tr>\n'%(dataownercode, x, stops[x]) for x in aligned])+'</table>'
+
+
+def getLines(today, dataownercode):
+    output = {}
     cur.execute("SELECT lineplanningnumber, transporttype, linepublicnumber, linename FROM line WHERE dataownercode = %s", (dataownercode,))
     lines = cur.fetchall()
 
     for lineplanningnumber, transporttype, linepublicnumber, linename in lines:
+        aligned = alignJourneyPatterns(today, dataownercode, lineplanningnumber)
+        if aligned is not None:
+            output[lineplanningnumber] = {'transporttype': transporttype, 'lineplanningnumber': lineplanningnumber, 'linepublicnumber': linepublicnumber, 'linename': linename, 'aligned': html(dataownercode, aligned)}
+
+    return output
+
+def showLines(today, dataownercode):
+    cur.execute("SELECT lineplanningnumber, transporttype, linepublicnumber, linename FROM line WHERE dataownercode = %s and lineplanningnumber = '6'", (dataownercode,))
+    lines = cur.fetchall()
+
+    for lineplanningnumber, transporttype, linepublicnumber, linename in lines:
             print transporttype, linepublicnumber, '-', linename, lineplanningnumber
-            aligned = alignJourneyPatterns(date.today(), dataownercode, lineplanningnumber)
+            aligned = alignJourneyPatterns(today, dataownercode, lineplanningnumber)
 
             if aligned is None:
                 print 'No pattern'
             else:
-                printAligned(aligned)
+                print html(dataownercode, aligned)
 
-showLines(date.today(), 'HTM')
-showLines(date.today(), 'ARR')
-showLines(date.today(), 'CXX')
-showLines(date.today(), 'VTN')
-#showLines(date.today(), 'GVB') Doesn't work yet, no stopareacodes defined
+#showLines(date.today(), 'HTM')
+#showLines(date.today(), 'ARR')
+#showLines(date.today(), 'CXX')
+#showLines(date.today(), 'VTN')
+#showLines(date.today(), 'GVB')

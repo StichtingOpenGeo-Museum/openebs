@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>openebs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/css/openebs.css" rel="stylesheet">
+    <link href="assets/css/datepicker.css" rel="stylesheet">
+    <!-- <link href="assets/css/bootstrap-responsive.css" rel="stylesheet"> -->
+    <link rel="stylesheet" href="assets/Leaflet/leaflet.css" />
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+      <link rel="stylesheet" href="assets/Leaflet/leaflet.ie.css" />
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="assets/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png">
+
+<style type="text/css">
+	.fw { width: 3.5em; }
+	.btn-fixed button { width: 8em; }
+    th.left { text-align: right; } 
+    th.right { text-align: left; } 
+    td.left { text-align: right; }
+    td.right { text-align: left; }
+
+      #map {
+        min-height: 600px;
+      /*  -moz-border-radius: 6px; 
+        -webkit-border-radius: 6px; 
+        -moz-box-shadow: 0px 6px 3px -3px #888;
+        -webkit-box-shadow: 0px 6px 3px -3px #888;
+        box-shadow: 0px 6px 3px -3px #888; 
+        background-color:white; border: solid 4px #80a8c1;
+        */
+      }
+</style>
+
+  </head>
+
+  <body data-spy="scroll" data-target=".bs-docs-sidebar">
+
+    <!-- Navbar
+    ================================================== -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="./index.html">openebs</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="">
+                <a href="./berichten.html">Berichten</a>
+              </li>
+              <li class="active">
+                <a href="./lijnen.html">Lijnen</a>
+              </li>
+              <li class="">
+                <a href="./kaart.html">Kaart</a>
+              </li>
+              <li class="">
+                <a href="./scenario.html">Scenario</a>
+              </li>
+            </ul>
+	    <form class="navbar-form pull-right">
+	      <span><a class='toggleToMap btn btn-success btn-normal disabled' href="#nieuwBerichtModal" id="btnNieuwBericht" onclick="return false;">Nieuw Bericht</a></span>
+	      <span><a class='toggleToMap btn btn-danger btn-normal disabled' href="#wijzigingModal" onclick="return false;">Wijzig Dienst</a></span>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<header class="jumbotron subhead" id="overview" style="padding-top: 60px;">
+</header>
+
+<div class="container">%(content)s</div>
+
+<div id="nieuwBerichtModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+              <h3 id="myModalLabel">Nieuw Bericht</h3>
+            </div>
+            <div class="modal-body">
+  <form class="form-horizontal">
+      <input type="hidden" name="stops" value="" id="stops" />
+      <div class="control-group">
+        <label class="control-label" for="messagepriority">Prioriteit</label>
+        <div class="controls">
+          <div id="messagepriority" class="btn-group btn-fixed" data-toggle="buttons-radio"><button name="messagepriority" value="CALAMITY" type="button" class-toggle="btn-danger" class="btn btn-mini" title="Calamiteiten, acute en ongeplande verstoring van de dienstuitvoering met als gevolg acute en volledige uitval van het OV voor de betreffende halte.">Calamiteit</button><button name="messagepriority" value="PTPROCESS" type="button" class-toggle="btn-success" class="btn btn-mini active btn-success" title="OV-proces gerelateerde mededelingen, informatie over de dienstuitvoering.">OV</button><button name="messagepriority" value="COMMERCIAL" type="button" class-toggle="btn-success" class="btn btn-mini" title="Commerci&euml;le mededelingen, OV gerelateerde informatie die niet over de dienstuitvoering gaat.">Commercieel</button><button name="messagepriority" value="MISC" type="button" class-toggle="btn-success" class="btn btn-mini" title="Overig, mededingen die niet onder een van de andere categorie&euml;n valt.">Overig</button></div>
+          <p class="help-block">Invloed op het operationeel proces.</p>
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label" for="messagetype">Soort</label>
+        <div class="controls">
+	   <div id="messagetype" class="btn-group btn-fixed" data-toggle="buttons-radio"><button name="messagetype" value="GENERAL" type="button" class-toggle="btn-success" class="btn btn-mini active btn-success" title="Algemeen bericht dat getoond wordt op de onderste regel van det display. Overschrijft de eventuele aanwezige ritinformatie op de onderste regel.">Algemeen</button><button name="messagetype" value="ADDITIONAL" type="button" class-toggle="btn-success" class="btn btn-mini" title="Tekst die getoond wordt op de onderste regel van het display in geval dat de regel niet in gebruik is voor het tonen van ritinformatie.">Extra</button><button name="messagetype" value="OVERRULE" type="button" class-toggle="btn-success" class="btn btn-mini" title="Tekst die op het gehele display getoond wordt. Vervangt eventueel andere getoonde informatie.">Overschrijf</button><button name="messagetype" value="BOTTOMLINE" type="button" class-toggle="btn-success" class="btn btn-mini" title="Tekst die op de onderste regels van het display wordt. De overgebleven display regels tonen ritinformatie.">Onderaan</button></div>
+          <p class="help-block">Locatie van het te tonen bericht.</p>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="messagecontent">Nieuwe vrije tekst</label>
+        <div class="controls">
+          <textarea type="text" class="input-xlarge limit" id="messagecontent" maxlength="255" row="1" data-provide="limit" data-countre="#counter" placeholder="Schrijf hier de nieuwe vrije tekst..."></textarea>
+	  <em id="counter">255</em>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="messagestarttime">Begintijd</label>
+        <div class="controls">
+	   <input id="messagestarttime" type="text" data-datepicker-format="dd-mm-yyyy hh:ii:ss" />
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="messageendtime">Eindtijd</label>
+        <div class="controls">
+	   <input id="messageendtime" type="text" data-datepicker-format="dd-mm-yyyy hh:ii:ss" />
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="messagescenario">Scenario</label>
+        <div class="controls">
+	   <input id="messagescenario" type="text" class="input-xlarge" maxlength="255" />
+            <p class="help-block">Naam van het scenario, om later te plannen.</p>
+        </div>
+      </div>
+
+  </form>
+
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal">Sluit</button>
+              <button class="btn btn-primary" id="nieuw-submit" onclick="kv15submit();">Publiceer</button>
+            </div>
+          </div>
+
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+    <script type="text/javascript" src="assets/Leaflet/leaflet.js"></script>
+    <script src="assets/js/jquery.js"></script>
+    <script src="assets/js/datepicker.js"></script>
+    <script src="assets/js/bootstrap.js"></script>
+    <script src="assets/js/bootstrap-limit.js"></script>
+    <script>
+
+function sort_and_unique( my_array ) {
+    my_array.sort();
+    for ( var i = 1; i < my_array.length; i++ ) {
+        if ( my_array[i] === my_array[ i - 1 ] ) {
+                    my_array.splice( i--, 1 );
+        }
+    }
+    return my_array;
+}
+
+function datetimetoxml(datetime) {
+    var arr = datetime.split(' ');
+    date_parts = arr[0].split('-');
+    return [date_parts[2], date_parts[1], date_parts[0]].join('-') + 'T' + arr[1];
+}
+
+function kv15submit() {
+    var post = {
+        "userstopcodes": sort_and_unique($.map($('.lijn .btn-success[data-toggle="button"]'), function(n, i) { return $(n).attr("id"); } )),
+        "messagepriority": $('button[name="messagepriority"].active').val(),
+        "messagetype": $('button[name="messagetype"].active').val(),
+        "messagecontent": $('#messagecontent').val()
+    }
+
+    
+    var messagescenario = $('#messagescenario').val();
+    if (messagescenario != '') {
+        post['messagescenario'] = messagescenario;
+    } else {
+        post['messagestarttime'] = datetimetoxml($('#messagestarttime').val());
+        post['messageendtime'] = datetimetoxml($('#messageendtime').val());
+    }
+
+    $.post("/KV15messages", post, function(data) {
+        $('#nieuwBerichtModal').modal('hide');
+    }, "json");
+}
+
+
+function selecteerHaltes(element) {
+        $(element).parent().prev().find('.btn')[0].click();
+        $(element).parent().next().find('.btn')[0].click();
+}
+
+function selecteer(index) {
+        var selector = '';
+        if (index == 0) {
+                selector = '.lijn .left > .btn[data-toggle="button"]';
+        } else if (index == 1) {
+                selector = '.lijn .right > .btn[data-toggle="button"]';
+        } else {
+                selector = '.lijn .btn[data-toggle="button"]';
+        }
+
+        $.each($(selector),function(index, value){ value.click(); });
+}
+
+$('#lijnen > .btn-group .btn').click(function() {
+	window.location.href='lijnen-'+$(this).attr('id')+'.html';
+});
+
+$('.btn-group > .btn, .btn[data-toggle="button"]').click(function() {
+
+        if($(this).attr('class-toggle') != undefined && !$(this).hasClass('disabled')){
+            var btnGroup = $(this).parent('.btn-group');
+
+            if(btnGroup.attr('data-toggle') == 'buttons-radio') {
+                btnGroup.find('.btn').each(function() {
+                    $(this).removeClass($(this).attr('class-toggle'));
+                });
+                $(this).addClass($(this).attr('class-toggle'));
+            }
+
+            if(btnGroup.attr('data-toggle') == 'buttons-checkbox' || $(this).attr('data-toggle') == 'button') {
+                if($(this).hasClass('active')) {
+                    $(this).removeClass($(this).attr('class-toggle'));
+                } else {
+                    $(this).addClass($(this).attr('class-toggle'));
+                }
+             }
+          }
+	  if ($('.lijn .btn-success[data-toggle="button"]').length > 0) {
+		$("#btnNieuwBericht").removeClass('disabled');
+        $("#btnNieuwBericht").attr("data-toggle", "modal");
+	  } else if (!$("#btnNieuwBericht").hasClass('disabled')) { 
+		$("#btnNieuwBericht").addClass('disabled');
+        $("#btnNieuwBericht").removeAttr("data-toggle");
+	  }
+      });
+
+      $(".limit").limit({ maxChars: 255, counter: "#counter" })
+
+      $('#messagescenario').keyup(function() {
+      	if (this.value.length == 0) {
+	   $("#messagestarttime").removeAttr("disabled");
+	   $("#messageendtime").removeAttr("disabled");
+	   $("#nieuw-submit").text("Publiceer");
+	} else {
+	   $("#messagestarttime").attr("disabled", "disabled");
+	   $("#messageendtime").attr("disabled", "disabled");
+	   $("#nieuw-submit").text("Opslaan");
+	}
+      });
+    </script>
+
+  </body>
+</html>
