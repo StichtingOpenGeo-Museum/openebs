@@ -1,12 +1,11 @@
-import psycopg2
 from datetime import date
 from operator import itemgetter
 from cgi import escape
-
-conn = psycopg2.connect("dbname=kv78turbo")
-cur = conn.cursor()
+from kv78turbo.database import connect
 
 def getLines(dataownercode):
+    cur = connect()
+
     output = {}
     cur.execute("select distinct transporttype from line where dataownercode = %s", (dataownercode,) )
     transporttypes = cur.fetchall()
