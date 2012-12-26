@@ -1,12 +1,11 @@
 #!/usr/bin/env python2
 
-import psycopg2
 from datetime import date
-
-conn = psycopg2.connect("dbname=kv78turbo")
-cur = conn.cursor()
+from kv78turbo.database import connect
 
 def getJourneyPatternPriority(operationdate, dataownercode, lineplanningnumber):
+    cur = connect()
+
     cur.execute("select p.linedirection, p.localservicelevelcode, p.journeypatterncode, max(userstopordernumber) as priority from localservicegroupvalidity as v, localservicegrouppasstime as p where v.dataownercode = p.dataownercode and v.localservicelevelcode = p.localservicelevelcode and v.operationdate = %s and v.dataownercode = %s and lineplanningnumber = %s group by p.localservicelevelcode, p.journeypatterncode, p.linedirection order by localservicelevelcode, priority desc, linedirection;", (operationdate, dataownercode, lineplanningnumber) )
     return cur.fetchall()
 
@@ -43,7 +42,8 @@ def alignJourneyPatternsSQL(operationdate, dataownercode, lineplanningnumber):
         sql = "SELECT one.*, two.* FROM (%s) AS one FULL JOIN (%s) AS two ON one.stopareacode = two.stopareacode ORDER BY one.myorder, two.myorder desc;" % (sql_one, sql_two)
     else:
         sql = sql_one
-
+    
+    cur = connect()
     cur.execute(sql)
     return cur.fetchall()
 
@@ -239,6 +239,8 @@ def printAligned2(aligned):
             print x
 
 def html(dataownercode, aligned):
+    cur = connect()
+
     cur.execute("SELECT userstopcode, timingpointname FROM usertimingpoint AS u, timingpoint AS t WHERE u.dataownercode = %s AND u.timingpointdataownercode = t.dataownercode AND u.timingpointcode = t.timingpointcode;", (dataownercode,))
     stops = {}
     for x in cur.fetchall():
@@ -263,6 +265,8 @@ def html(dataownercode, aligned):
 
 
 def getLines(today, dataownercode):
+    cur = connect()
+
     output = {}
     cur.execute("SELECT lineplanningnumber, transporttype, linepublicnumber, linename FROM line WHERE dataownercode = %s", (dataownercode,))
     lines = cur.fetchall()
@@ -275,6 +279,7 @@ def getLines(today, dataownercode):
     return output
 
 def showLines(today, dataownercode):
+    cur = connect()
     cur.execute("SELECT lineplanningnumber, transporttype, linepublicnumber, linename FROM line WHERE dataownercode = %s and lineplanningnumber = '6'", (dataownercode,))
     lines = cur.fetchall()
 
