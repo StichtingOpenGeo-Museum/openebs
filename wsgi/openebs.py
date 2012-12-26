@@ -15,8 +15,11 @@ from kv15.kv15messages import KV15messages
 COMMON_HEADERS = [('Content-Type', 'application/json'), ('Access-Control-Allow-Origin', '*'), ('Access-Control-Allow-Headers', 'Requested-With,Content-Type')]
 
 def templateLijnen(content):
-    template = open('../templates/lijnen.html').read()
+    template = open('templates/lijnen.html').read()
     return template % {'content': content}
+
+def renderKV15messages(dataownercode):
+    messages = getMessages(dataownercode)
 
 def renderLinePages(dataownercode):
     cache_lines = cacheLines(dataownercode)
@@ -72,61 +75,67 @@ def badrequest(start_response):
 def openebs(environ, start_response):
     url = environ['PATH_INFO'][1:]
     try:
-        username = environ['REMOTE_USER']
-        dataowner = 'HTM'
+        username, domain = environ['REMOTE_USER'].split('@')
     except:
         return notfound(start_response)
 
     if url == '/update':
-        renderLinePages('HTM')
+        renderLinePages(domain)
+
+    elif url == '/berichten.html':
+        renderKV15messages(domain)
 
     elif url == '/KV15messages':
-        post_env = environ.copy()
-        post_env['QUERY_STRING'] = ''
-        post = cgi.FieldStorage(fp=env['wsgi.input'], environ=post_env, keep_blank_values=False)
+        if environ['REQUEST_METHOD'] == 'GET':
+            renderMessagePage(domain)
 
-        if 'userstopcodes' in post and messagecontent in post:
-            try:
-                [int(x) for x in post['userstopcodes']]
-            except:
-                return badrequest(start_reponse)
-        else:
-            return badrequest(start_response)
+        elif environ['REQUEST_METHOD'] == 'POST':
+            post_env = environ.copy()
+            post_env['QUERY_STRING'] = ''
+            post = cgi.FieldStorage(fp=env['wsgi.input'], environ=post_env, keep_blank_values=False)
 
-        msg = StopMessage(dataownercode=dataowner, userstopcodes=post['userstopcodes'], messagecontent=post['messagecontent'])
-
-        if 'messagepriority' in post:
-            if MessagePriority().validate(post['messagepriority']):
-                msg.messagepriority = post['messagepriority']
+            if 'userstopcodes' in post and messagecontent in post:
+                try:
+                    [int(x) for x in post['userstopcodes']]
+                except:
+                    return badrequest(start_reponse)
             else:
                 return badrequest(start_response)
 
-        if 'messagetype' in post:
-            if MessageType().validate(post['messagetype']):
-                msg.messagetype = post['messagetype']
-            else:
-                return badrequest(start_response)
+            msg = StopMessage(dataownercode=dataowner, userstopcodes=post['userstopcodes'], messagecontent=post['messagecontent'])
 
-        if 'messagestarttime' in post:
-            try:
-                msg.messagestarttime = datetime.strptime(post['messagestarttime'], '%Y-%m-%dT%H:%M:%S')
-            except:
-                return badrequest(start_reponse)
-        
-        if 'messageendtime' in post:
-            try:
-                msg.messageendtime = datetime.strptime(post['messageendtime'], '%Y-%m-%dT%H:%M:%S')
-            except:
-                return badrequest(start_reponse)
+            if 'messagepriority' in post:
+                if MessagePriority().validate(post['messagepriority']):
+                    msg.messagepriority = post['messagepriority']
+                else:
+                    return badrequest(start_response)
 
-        kv15 = KV15messages(stopmessages = [msg])
+            if 'messagetype' in post:
+                if MessageType().validate(post['messagetype']):
+                    msg.messagetype = post['messagetype']
+                else:
+                    return badrequest(start_response)
 
-        if 'messagescenario' in post:
-            if len(post['messagescenario']) > 0:
-                kv15.store(post['messagescenario'])
-            else:
-                return badrequest(start_reponse)
-        
-        else:     
-            kv15.push(remote, '/TMI_Post/KV15')
+            if 'messagestarttime' in post:
+                try:
+                    msg.messagestarttime = datetime.strptime(post['messagestarttime'], '%Y-%m-%dT%H:%M:%S')
+                except:
+                    return badrequest(start_reponse)
+            
+            if 'messageendtime' in post:
+                try:
+                    msg.messageendtime = datetime.strptime(post['messageendtime'], '%Y-%m-%dT%H:%M:%S')
+                except:
+                    return badrequest(start_reponse)
+
+            kv15 = KV15messages(stopmessages = [msg])
+
+            if 'messagescenario' in post:
+                if len(post['messagescenario']) > 0:
+                    kv15.store(post['messagescenario'])
+                else:
+                    return badrequest(start_reponse)
+            
+            else:     
+                kv15.push(remote, '/TMI_Post/KV15')
 
