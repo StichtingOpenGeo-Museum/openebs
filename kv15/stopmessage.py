@@ -239,7 +239,27 @@ class StopMessage():
         (select string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
         (select string_agg(lineplanningnumber, '|') as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
         messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent, messagetimestamp
-        from kv15_stopmessage where dataownercode = %s LIMIT 50;""", (dataownercode,));
+        from kv15_stopmessage where dataownercode = %s AND scenario IS NULL LIMIT 50;""", (dataownercode,));
+
+        output = cur.fetchall()
+        for row in output:
+            row['userstopcodes'] = row['userstopcodes'].split('|')
+            row['lineplanningnumbers'] = row['lineplanningnumbers'].split('|')
+
+        return json.dumps(output)
+    
+    def overview_scenario(self, dataownercode, conn=None):
+        if conn is None:
+            conn = psycopg2.connect(kv15_database_connect)
+
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        cur.execute("""select dataownercode, scenario,
+                       string_agg(userstopcodes, '|') as userstopcodes, string_agg(lineplanningnumbers, '|') as lineplanningnumbers
+                       from
+                       (select dataownercode, messagecodedate, messagecodenumber, scenario,
+                       (select string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
+                       (select string_agg(lineplanningnumber, '|') as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber) from kv15_stopmessage where dataownercode = %s AND scenario IS NOT NULL) AS X GROUP BY dataownercode, scenario ORDER BY scenario;""", (dataownercode,));
 
         output = cur.fetchall()
         for row in output:
