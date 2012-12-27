@@ -1,5 +1,8 @@
+import psycopg2
+
 from io.push import Push
-from kv15.database import connect
+
+from settings.const import kv15_database_connect
 
 class KV15messages:
     def __init__(self, stopmessages = None):
@@ -19,9 +22,9 @@ class KV15messages:
     def push(self, remote, path):
         return Push(dossiername='KV15messages', content = self, namespace='http://bison.connekt.nl/tmi8/kv15/msg').push(remote, path)
 
-    def save(self, cur = None):
-        if cur is None:
-            cur = connect()
+    def save(self, conn = None):
+        if conn is None:
+            conn = psycopg2.connect(kv15_database_connect)
 
         for stopmessage in self.stopmessages:
-            stopmessage.save(cur)
+            stopmessage.save(conn)

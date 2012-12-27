@@ -3,6 +3,9 @@ from datetime import time
 from datetime import datetime
 from datetime import timedelta
 
+import json
+import pytz
+import psycopg2
 from xml.sax.saxutils import escape
 
 from enum.messagepriority import MessagePriority
@@ -19,8 +22,7 @@ from enum.advice import SubAdviceType
 
 from kv15.deletemessage import DeleteMessage
 
-from kv15.database import connect
-import pytz
+from settings.const import kv15_database_connect
 
 class StopMessage():
     def _next_messagecodenumber(self):
@@ -32,12 +34,11 @@ class StopMessage():
         open('/tmp/serial.txt', 'w').write(str(serial))
 
         return serial
-#       try:
-#           cur = connect()
-#           cur.execute("""SELECT nextval('messagecodenumber');""")
-#           return cur.fetchall()[0][0]
-#       except:
-#           return None
+
+        # conn = psycopg2.connect(kv15_database_connect)
+        # cur = conn.cursor()
+        # cur.execute("""SELECT nextval('messagecodenumber');""")
+        # return cur.fetchall()[0][0]
 
     def __init__(self, dataownercode=None, messagecodedate=None, messagecodenumber=None, userstopcodes=None, lineplanningnumbers=None, messagepriority=None, messagetype=None, messagedurationtype=None, messagestarttime=None, messageendtime=None, messagecontent=None, reasontype=None, subreasontype=None, reasoncontent=None, effecttype=None, subeffecttype=None, effectcontent=None, measuretype=None, submeasuretype=None, measurecontent=None, advicetype=None, subadvicetype=None, advicecontent=None, messagetimestamp=None):
 
@@ -209,18 +210,36 @@ class StopMessage():
         self.messagetimestamp = messagetimestamp
 
 
-    def load(self, dataownercode, messagecodedate, messagecodenumber, cur=None):
-        if cur is None:
-            cur = connect()
+    def load(self, dataownercode, messagecodedate, messagecodenumber, conn=None):
+        if conn is None:
+            conn = psycopg2.connect(kv15_database_connect)
+
+        cur = conn.cursor()
         
         cur.execute("""select dataownercode, messagecodedate, messagecodenumber, userstopcodes, lineplanningnumbers, messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent, messagetimestamp from (select dataownercode, messagecodedate, messagecodenumber, string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = %s and messagecodedate = %s and messagecodenumber = %s group by dataownercode, messagecodedate, messagecodenumber) as userstopcodes left join kv15_stopmessage using (dataownercode, messagecodedate, messagecodenumber) LIMIT 1;""", (dataownercode, messagecodedate, messagecodenumber,));
 
         for row in cur.fetchall():
             self.update(row)
 
-    def save(self, cur=None):
-        if cur is None:
-            cur = connect()
+    def overview(self, dataownercode, conn=None):
+        if conn is None:
+            conn = psycopg2.connect(kv15_database_connect)
+
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        cur.execute("""select dataownercode, messagecodedate, messagecodenumber, userstopcodes, lineplanningnumbers, messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent, messagetimestamp from (select dataownercode, messagecodedate, messagecodenumber, string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = %s group by dataownercode, messagecodedate, messagecodenumber) as userstopcodes right join kv15_stopmessage using (dataownercode, messagecodedate, messagecodenumber) where scenario is null order by messageendtime desc, messagestarttime desc LIMIT 50;""", (dataownercode,));
+
+        output = cur.fetchall()
+        for row in output:
+            row['userstopcodes'] = row['userstopcodes'].split('|')
+
+        return json.dumps(output)
+
+    def save(self, conn=None):
+        if conn is None:
+            conn = psycopg2.connect(kv15_database_connect)
+
+        cur = conn.cursor()
 
         cur.execute("""INSERT INTO KV15messages (dataownercode, messagetimestamp, messagecodedate, messagecodenumber, messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", (self.dataownercode, self.messagetimestamp.replace(microsecond=0).isoformat(), self.messagecodedate, self.messagecodenumber, self.messagepriority, self.messagetype, self.messagedurationtype, self.messagestarttime.replace(microsecond=0).isoformat(), self.messageendtime.replace(microsecond=0).isoformat(), self.messagecontent, self.reasontype, self.subreasontype, self.reasoncontent, self.effecttype, self.subeffecttype, self.effectcontent, self.measuretype, self.submeasuretype, self.measurecontent, self.advicetype, self.subadvicetype, self.advicecontent,))
         for userstopcode in self.userstopcodes:

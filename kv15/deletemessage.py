@@ -3,7 +3,7 @@ from datetime import time
 from datetime import datetime
 from datetime import timedelta
 
-#from settings.const import database_connect
+# TODO delete moet database informeren
 
 class DeleteMessage():
 	def __init__(self, dataownercode='openOV', messagecodedate=None, messagecodenumber=None):
