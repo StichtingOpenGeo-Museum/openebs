@@ -7,6 +7,7 @@ from kv78turbo.render import renderLines, getLines as cacheLines
 from kv78turbo.journeypatternizer import getLines
 from enum.messagepriority import MessagePriority
 from enum.messagetype import MessageType
+from enum.domain import auth_lookup
 from settings.const import remote
 from datetime import datetime
 from kv15.stopmessage import StopMessage
@@ -74,20 +75,22 @@ def badrequest(start_response):
 
 def openebs(environ, start_response):
     url = environ['PATH_INFO'][1:]
+    dataownercode = None
     try:
         username, domain = environ['REMOTE_USER'].split('@')
+        dataownercode = authlookup[domain.lower()]
     except:
         return notfound(start_response)
 
     if url == '/update':
-        renderLinePages(domain)
+        renderLinePages(dataownercode)
 
     elif url == '/berichten.html':
-        renderKV15messages(domain)
+        renderKV15messages(dataownercode)
 
     elif url == '/KV15messages':
         if environ['REQUEST_METHOD'] == 'GET':
-            renderMessagePage(domain)
+            renderMessagePage(dataownercode)
 
         elif environ['REQUEST_METHOD'] == 'POST':
             post_env = environ.copy()
