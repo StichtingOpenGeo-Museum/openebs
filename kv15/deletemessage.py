@@ -33,10 +33,10 @@ class DeleteMessage():
 
 		return xml
 
-    def save(self, conn=None):
-        if conn is None:
-            conn = psycopg2.connect(kv15_database_connect)
+	def save(self, conn=None):
+		if conn is None:
+			conn = psycopg2.connect(kv15_database_connect)
 
-        cur = conn.cursor()
+		cur = conn.cursor()
 
-        cur.execute("""UPDATE KV15messages SET messageendtime = now() WHERE dataownercode = %s AND messagecodedate = %s AND messagecodenumber = %s;""", self.dataownercode, self.messagecodedate, self.messagecodenumber)
+		cur.execute("""UPDATE KV15messages SET messageendtime = now() WHERE dataownercode = %s AND messagecodedate = %s AND messagecodenumber = %s;""", self.dataownercode, self.messagecodedate, self.messagecodenumber)
