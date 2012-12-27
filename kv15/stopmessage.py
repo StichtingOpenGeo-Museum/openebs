@@ -6,6 +6,7 @@ from datetime import timedelta
 import json
 import pytz
 import psycopg2
+import psycopg2.extras
 from xml.sax.saxutils import escape
 
 from enum.messagepriority import MessagePriority
@@ -85,26 +86,26 @@ class StopMessage():
 
         if effecttype is None:
             self.effecttype = EffectType.ONGEDEFINIEERD
-        if self.subeffecttype is None:
+        if subeffecttype is None:
             self.subeffecttype = SubEffectType.ONBEKEND
-        if self.effectcontent is None:
+        if effectcontent is None:
             self.effectcontent = ''
 
         if measuretype is None:
             self.measuretype = MeasureType.ONGEDEFINIEERD
-        if self.submeasuretype is None:
+        if submeasuretype is None:
             self.submeasuretype = SubMeasureType.GEEN
-        if self.measurecontent is None:
+        if measurecontent is None:
             self.measurecontent = ''
 
-        if self.advicetype is None:
+        if advicetype is None:
             self.advicetype = AdviceType.ONGEDEFINIEERD
-        if self.subadvicetype is None:
+        if subadvicetype is None:
             self.subadvicetype = SubAdviceType.GEEN
-        if self.advicecontent is None:
+        if advicecontent is None:
             self.advicecontent = ''
 
-        if self.messagetimestamp is None:
+        if messagetimestamp is None:
             self.messagetimestamp = datetime.now()
 
     def __str__(self):
@@ -184,31 +185,30 @@ class StopMessage():
 
     def update(self, row):
         dataownercode, messagecodedate, messagecodenumber, userstopcodes, lineplanningnumbers, messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent, messagetimestamp = row
-        self.dataownercode = dataownercode
-        self.messagecodedate = messagecodedate
-        self.messagecodenumber = messagecodenumber
-        self.userstopcodes = userstopcodes.split('|')
-        self.lineplanningnumbers = lineplanningnumbers
-        self.messagepriority = messagepriority
-        self.messagetype = messagetype
-        self.messagedurationtype = messagedurationtype
-        self.messagestarttime = messagestarttime
-        self.messageendtime = messageendtime
-        self.messagecontent = messagecontent
-        self.reasontype = reasontype
-        self.subreasontype = subreasontype
-        self.reasoncontent = reasoncontent
-        self.effecttype = effecttype
-        self.subeffecttype = subeffecttype
-        self.effectcontent = effectcontent
-        self.measuretype = measuretype
-        self.submeasuretype = submeasuretype
-        self.measurecontent = measurecontent
-        self.advicetype = advicetype
-        self.subadvicetype = subadvicetype
-        self.advicecontent = advicecontent
-        self.messagetimestamp = messagetimestamp
-
+        self.dataownercode  = row['dataownercode'];
+        self.messagecodedate  = row['messagecodedate'];
+        self.messagecodenumber  = row['messagecodenumber'];
+        self.userstopcodes  = row['userstopcodes'];
+        self.lineplanningnumbers  = row['lineplanningnumbers'];
+        self.messagepriority  = row['messagepriority'];
+        self.messagetype  = row['messagetype'];
+        self.messagedurationtype  = row['messagedurationtype'];
+        self.messagestarttime  = row['messagestarttime'];
+        self.messageendtime  = row['messageendtime'];
+        self.messagecontent  = row['messagecontent'];
+        self.reasontype  = row['reasontype'];
+        self.subreasontype  = row['subreasontype'];
+        self.reasoncontent  = row['reasoncontent'];
+        self.effecttype  = row['effecttype'];
+        self.subeffecttype  = row['subeffecttype'];
+        self.effectcontent  = row['effectcontent'];
+        self.measuretype  = row['measuretype'];
+        self.submeasuretype  = row['submeasuretype'];
+        self.measurecontent  = row['measurecontent'];
+        self.advicetype  = row['advicetype'];
+        self.subadvicetype  = row['subadvicetype'];
+        self.advicecontent  = row['advicecontent'];
+        self.messagetimestamp  = row['messagetimestamp'];
 
     def load(self, dataownercode, messagecodedate, messagecodenumber, conn=None):
         if conn is None:
@@ -216,9 +216,17 @@ class StopMessage():
 
         cur = conn.cursor()
         
-        cur.execute("""select dataownercode, messagecodedate, messagecodenumber, userstopcodes, lineplanningnumbers, messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent, messagetimestamp from (select dataownercode, messagecodedate, messagecodenumber, string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = %s and messagecodedate = %s and messagecodenumber = %s group by dataownercode, messagecodedate, messagecodenumber) as userstopcodes left join kv15_stopmessage using (dataownercode, messagecodedate, messagecodenumber) LIMIT 1;""", (dataownercode, messagecodedate, messagecodenumber,));
+        cur.execute("""select dataownercode, messagecodedate, messagecodenumber, 
+        (select string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
+        (select string_agg(lineplanningnumber, '|') as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
+        messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent, messagetimestamp
+        from kv15_stopmessage where dataownercode = %s and messagecodedate = %s and messagecodenumber = %s LIMIT 1;""", (dataownercode, messagecodedate, messagecodenumber,));
 
-        for row in cur.fetchall():
+        output = cur.fetchall()
+        for row in output:
+            row['userstopcodes'] = row['userstopcodes'].split('|')
+            row['lineplanningnumbers'] = row['lineplanningnumbers'].split('|')
+            
             self.update(row)
 
     def overview(self, dataownercode, conn=None):
@@ -226,12 +234,17 @@ class StopMessage():
             conn = psycopg2.connect(kv15_database_connect)
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-        cur.execute("""select dataownercode, messagecodedate, messagecodenumber, userstopcodes, lineplanningnumbers, messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent, messagetimestamp from (select dataownercode, messagecodedate, messagecodenumber, string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = %s group by dataownercode, messagecodedate, messagecodenumber) as userstopcodes right join kv15_stopmessage using (dataownercode, messagecodedate, messagecodenumber) where scenario is null order by messageendtime desc, messagestarttime desc LIMIT 50;""", (dataownercode,));
+        
+        cur.execute("""select dataownercode, messagecodedate, messagecodenumber, 
+        (select string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
+        (select string_agg(lineplanningnumber, '|') as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
+        messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent, messagetimestamp
+        from kv15_stopmessage where dataownercode = %s LIMIT 50;""", (dataownercode,));
 
         output = cur.fetchall()
         for row in output:
             row['userstopcodes'] = row['userstopcodes'].split('|')
+            row['lineplanningnumbers'] = row['lineplanningnumbers'].split('|')
 
         return json.dumps(output)
 
