@@ -3,8 +3,6 @@ from datetime import time
 from datetime import datetime
 from datetime import timedelta
 
-# TODO delete moet database informeren
-
 class DeleteMessage():
 	def __init__(self, dataownercode='openOV', messagecodedate=None, messagecodenumber=None):
 		self.dataownercode = dataownercode
@@ -35,4 +33,10 @@ class DeleteMessage():
 
 		return xml
 
+    def save(self, conn=None):
+        if conn is None:
+            conn = psycopg2.connect(kv15_database_connect)
 
+        cur = conn.cursor()
+
+        cur.execute("""UPDATE KV15messages SET messageendtime = now() WHERE dataownercode = %s AND messagecodedate = %s AND messagecodenumber = %s;""", self.dataownercode, self.messagecodedate, self.messagecodenumber)
