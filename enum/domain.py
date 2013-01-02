@@ -7,7 +7,7 @@ auth_lookup = {
     'htm.net': 'HTM',
     'ns.nl': 'NS',
     'opengeo.nl': 'OPENOV',
-    'qbuzz.nl': 'QBUZZ'
+    'qbuzz.nl': 'QBUZZ',
     'ret.nl': 'RET',
     'syntus.nl': 'SYNTUS'
 }
