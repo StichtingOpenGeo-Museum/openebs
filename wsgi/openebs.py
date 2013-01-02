@@ -73,12 +73,24 @@ def badrequest(start_response):
     start_response('400 Bad Request', COMMON_HEADERS + [('Content-length', '14')])
     yield '<badrequest />'
 
+def authenticate(start_response):
+    start_response('401 Unauthorized', COMMON_HEADERS + [('Content-length', '16'), ('WWW-Authenticate', 'Basic realm="openebs.nl"')])
+    yield '<unauthorized />'
+
 def openebs(environ, start_response):
-    url = environ['PATH_INFO'][1:]
+    url = environ['PATH_INFO']
     dataownercode = None
+
+    if 'REMOTE_USER' not in environ and 'HTTP_AUTHORIZATION' not in environ:
+        return authenticate(start_response)
+
+    if 'HTTP_AUTHORIZATION' in environ:
+        import base64
+        environ['REMOTE_USER'], _pass = base64.decodestring(environ['HTTP_AUTHORIZATION'].split('Basic ')[1]).split(':', 2)
+
     try:
         username, domain = environ['REMOTE_USER'].split('@')
-        dataownercode = authlookup[domain.lower()]
+        dataownercode = auth_lookup[domain.lower()]
     except:
         return notfound(start_response)
 
@@ -88,9 +100,17 @@ def openebs(environ, start_response):
     elif url == '/berichten.html':
         renderKV15messages(dataownercode)
 
+    elif url == '/KV15scenarios':
+         if environ['REQUEST_METHOD'] == 'GET':
+            reply = StopMessage().overview_scenario(dataownercode)
+            start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
+            return reply
+
     elif url == '/KV15messages':
         if environ['REQUEST_METHOD'] == 'GET':
-            renderMessagePage(dataownercode)
+            reply = StopMessage().overview(dataownercode)
+            start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
+            return reply
 
         elif environ['REQUEST_METHOD'] == 'POST':
             post_env = environ.copy()
@@ -142,3 +162,6 @@ def openebs(environ, start_response):
             else:     
                 kv15.push(remote, '/TMI_Post/KV15')
 
+    return notfound(start_response)
+
+uwsgi.applications = {'': openebs}
