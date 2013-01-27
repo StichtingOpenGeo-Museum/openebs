@@ -151,6 +151,9 @@ def openebs(environ, start_response):
                 except:
                     return badrequest(start_reponse)
 
+            if msg.messagestarttime <= msg.messageendtime:
+                return badrequest(start_reponse)
+
             kv15 = KV15messages(stopmessages = [msg])
 
             if 'messagescenario' in post:
