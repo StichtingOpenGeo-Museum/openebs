@@ -4,5 +4,5 @@ class MessageType:
 	OVERRULE = 'OVERRULE'
 	BOTTOMLINE = 'BOTTOMLINE'
 
-	def validate(self):
+	def validate(self,value):
 		return value in (self.GENERAL, self.ADDITIONAL, self.OVERRULE, self.BOTTOMLINE)
