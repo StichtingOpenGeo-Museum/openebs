@@ -41,7 +41,7 @@ class StopMessage():
         cur.execute("""SELECT nextval('messagecodenumber');""")
         return cur.fetchall()[0][0]
 
-    def __init__(self, dataownercode='openOV', messagecodedate=date.today(), messagecodenumber=None, userstopcodes=[], lineplanningnumbers=None, 
+    def __init__(self, dataownercode='openOV', messagecodedate=date.today(), messagecodenumber=None,userstopcodes=[], lineplanningnumbers=None, 
                  messagepriority=MessagePriority.PTPROCESS,messagetype=MessageType.GENERAL, messagedurationtype=MessageDurationType.ENDTIME, 
                  messagestarttime=datetime.now(), messageendtime=datetime.combine(date.today() + timedelta(days = 1), time(4, 0, 0)), messagecontent='', 
                  reasontype=ReasonType.ONGEDEFINIEERD, subreasontype=SubReasonType.ONBEKEND, reasoncontent='', 
@@ -51,7 +51,10 @@ class StopMessage():
 
         self.dataownercode = dataownercode
         self.messagecodedate = date.today()
-        self.messagecodenumber = messagecodenumber
+        if messagecodenumber is None:
+            self.messagecodenumber = self._next_messagecodenumber()
+        else:
+            self.messagecodenumber = messagecodenumber
         self.userstopcodes = userstopcodes
         self.messagepriority = messagepriority
         self.messagetype = messagetype
@@ -248,9 +251,9 @@ class StopMessage():
             conn_created = True
         cur = conn.cursor()
 
-        cur.execute("""INSERT INTO KV15messages (dataownercode, messagetimestamp, messagecodedate, messagecodenumber, messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", (self.dataownercode, self.messagetimestamp.replace(microsecond=0).isoformat(), self.messagecodedate, self.messagecodenumber, self.messagepriority, self.messagetype, self.messagedurationtype, self.messagestarttime.replace(microsecond=0).isoformat(), self.messageendtime.replace(microsecond=0).isoformat(), self.messagecontent, self.reasontype, self.subreasontype, self.reasoncontent, self.effecttype, self.subeffecttype, self.effectcontent, self.measuretype, self.submeasuretype, self.measurecontent, self.advicetype, self.subadvicetype, self.advicecontent,))
+        cur.execute("""INSERT INTO kv15_stopmessage (dataownercode, messagetimestamp, messagecodedate, messagecodenumber, messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", (self.dataownercode, self.messagetimestamp.replace(microsecond=0).isoformat(), self.messagecodedate, self.messagecodenumber, self.messagepriority, self.messagetype, self.messagedurationtype, self.messagestarttime.replace(microsecond=0).isoformat(), self.messageendtime.replace(microsecond=0).isoformat(), self.messagecontent, self.reasontype, self.subreasontype, self.reasoncontent, self.effecttype, self.subeffecttype, self.effectcontent, self.measuretype, self.submeasuretype, self.measurecontent, self.advicetype, self.subadvicetype, self.advicecontent,))
         for userstopcode in self.userstopcodes:
             cur.execute("""INSERT INTO kv15_stopmessage_userstopcode (dataownercode, messagecodedate, messagecodenumber, userstopcode) VALUES (%s, %s, %s, %s)""", (self.dataownercode, self.messagecodedate, self.messagecodenumber, userstopcode))
-  
+        conn.commit()  
         if conn_created:
             conn.close()
