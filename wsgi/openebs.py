@@ -168,11 +168,13 @@ def openebs(environ, start_response):
                 if len(post['messagescenario']) > 0:
                     kv15.store(post['messagescenario'])
                 else:
-                    return badrequest(start_reponse, 'MessageScenario kan niet worden gevalideerd')
-            
+                    return badrequest(start_reponse, 'MessageScenario kan niet worden gevalideerd')            
             else:     
-                kv15.push(remote, '/TMI_Post/KV15')
+                kv15.push(remote, '/RIG/KV15messages')
 
+            reply = 'ok'
+            start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
+            return reply
     return notfound(start_response)
 
 uwsgi.applications = {'': openebs}
