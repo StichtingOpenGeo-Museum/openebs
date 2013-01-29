@@ -14,6 +14,7 @@ from kv15.stopmessage import StopMessage
 from kv15.kv15messages import KV15messages
 
 COMMON_HEADERS = [('Content-Type', 'application/json'), ('Access-Control-Allow-Origin', '*'), ('Access-Control-Allow-Headers', 'Requested-With,Content-Type')]
+COMMON_HEADERS_TEXT = [('Content-Type', 'text/plain'), ('Access-Control-Allow-Origin', '*'), ('Access-Control-Allow-Headers', 'Requested-With,Content-Type')]
 
 def templateLijnen(content):
     template = open('templates/lijnen.html').read()
@@ -66,16 +67,16 @@ def renderLinePages(dataownercode):
         f.close()
 
 def notfound(start_response):
-    start_response('404 File Not Found', COMMON_HEADERS + [('Content-length', '12')])
-    yield '<notfound />'
+    start_response('404 File Not Found', COMMON_HEADERS_TEXT + [('Content-length', '13')])
+    yield 'Niet gevonden'
 
-def badrequest(start_response):
-    start_response('400 Bad Request', COMMON_HEADERS + [('Content-length', '14')])
-    yield '<badrequest />'
+def badrequest(start_response, error):
+    start_response('400 Bad Request', COMMON_HEADERS_TEXT + [('Content-length', str(len(error)))])
+    yield error
 
 def authenticate(start_response):
-    start_response('401 Unauthorized', COMMON_HEADERS + [('Content-length', '16'), ('WWW-Authenticate', 'Basic realm="openebs.nl"')])
-    yield '<unauthorized />'
+    start_response('401 Unauthorized', COMMON_HEADERS_TEXT + [('Content-length', '19'), ('WWW-Authenticate', 'Basic realm="openebs.nl"')])
+    yield 'Niet geauthoriseerd'
 
 def openebs(environ, start_response):
     url = environ['PATH_INFO']
@@ -84,7 +85,7 @@ def openebs(environ, start_response):
     if 'REMOTE_USER' not in environ and 'HTTP_AUTHORIZATION' not in environ:
         return authenticate(start_response)
 
-    if 'HTTP_AUTHORIZATION' in environ:
+    if 'REMOTE_USER' not in environ and 'HTTP_AUTHORIZATION' in environ:
         import base64
         environ['REMOTE_USER'], _pass = base64.decodestring(environ['HTTP_AUTHORIZATION'].split('Basic ')[1]).split(':', 2)
 
@@ -115,41 +116,51 @@ def openebs(environ, start_response):
         elif environ['REQUEST_METHOD'] == 'POST':
             post_env = environ.copy()
             post_env['QUERY_STRING'] = ''
-            post = cgi.FieldStorage(fp=env['wsgi.input'], environ=post_env, keep_blank_values=False)
-
-            if 'userstopcodes' in post and messagecontent in post:
+            post = cgi.FieldStorage(fp=environ['wsgi.input'], environ=post_env, keep_blank_values=False)
+            userstopcodes = None
+            if 'userstopcodes[]' in post:
                 try:
-                    [int(x) for x in post['userstopcodes']]
+                    userstopcodes = [x.value.split('_')[1] for x in post['userstopcodes[]']]
                 except:
-                    return badrequest(start_reponse)
+                    return badrequest(start_response, 'Fout in UserStopCodes formaat')
+                for x in post['userstopcodes[]']:
+                    if x.value.split('_')[0] != dataownercode:
+                        return badrequest(start_response, 'Userstopcodes buiten dataowner domein')
             else:
-                return badrequest(start_response)
+                if 'userstopcodes[]' not in post:
+                    return badrequest(start_response, 'UserStopCodes ontbreken')
 
-            msg = StopMessage(dataownercode=dataowner, userstopcodes=post['userstopcodes'], messagecontent=post['messagecontent'])
+            if 'messagecontent' not in post:
+                return badrequest(start_response, 'Bericht ontbreekt')
+
+            msg = StopMessage(dataownercode=dataownercode, userstopcodes=userstopcodes, messagecontent=post['messagecontent'].value)
 
             if 'messagepriority' in post:
-                if MessagePriority().validate(post['messagepriority']):
-                    msg.messagepriority = post['messagepriority']
+                if MessagePriority().validate(post['messagepriority'].value):
+                    msg.messagepriority = post['messagepriority'].value
                 else:
-                    return badrequest(start_response)
+                    return badrequest(start_response, 'MessagePriority kan niet worden gevalideerd')
 
             if 'messagetype' in post:
-                if MessageType().validate(post['messagetype']):
-                    msg.messagetype = post['messagetype']
+                if MessageType().validate(post['messagetype'].value):
+                    msg.messagetype = post['messagetype'].value
                 else:
-                    return badrequest(start_response)
+                    return badrequest(start_response, 'MessageType kan niet worden gevalideerd')
 
             if 'messagestarttime' in post:
                 try:
-                    msg.messagestarttime = datetime.strptime(post['messagestarttime'], '%Y-%m-%dT%H:%M:%S')
+                    msg.messagestarttime = datetime.strptime(post['messagestarttime'].value, '%Y-%m-%dT%H:%M:%S')
                 except:
-                    return badrequest(start_reponse)
+                    return badrequest(start_reponse, 'MessageStartTime kan niet worden gevalideerd')
             
             if 'messageendtime' in post:
                 try:
-                    msg.messageendtime = datetime.strptime(post['messageendtime'], '%Y-%m-%dT%H:%M:%S')
+                    msg.messageendtime = datetime.strptime(post['messageendtime'].value, '%Y-%m-%dT%H:%M:%S')
                 except:
-                    return badrequest(start_reponse)
+                    return badrequest(start_reponse, 'MessageEndTime kan niet worden gevalideerd')
+
+            if msg.messagestarttime >= msg.messageendtime:
+                return badrequest(start_response, 'MessageStartTime later of gelijk aan MessageEndTime')
 
             kv15 = KV15messages(stopmessages = [msg])
 
@@ -157,7 +168,7 @@ def openebs(environ, start_response):
                 if len(post['messagescenario']) > 0:
                     kv15.store(post['messagescenario'])
                 else:
-                    return badrequest(start_reponse)
+                    return badrequest(start_reponse, 'MessageScenario kan niet worden gevalideerd')
             
             else:     
                 kv15.push(remote, '/TMI_Post/KV15')
