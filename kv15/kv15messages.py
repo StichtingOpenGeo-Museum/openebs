@@ -23,8 +23,11 @@ class KV15messages:
         return Push(dossiername='KV15messages', content = self, namespace='http://bison.connekt.nl/tmi8/kv15/msg').push(remote, path)
 
     def save(self, conn = None):
+        conn_created = False
         if conn is None:
             conn = psycopg2.connect(kv15_database_connect)
-
+            conn_created = True
         for stopmessage in self.stopmessages:
             stopmessage.save(conn)
+        if conn_created:
+            conn.close()

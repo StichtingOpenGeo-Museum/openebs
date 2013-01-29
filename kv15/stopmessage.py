@@ -27,19 +27,19 @@ from settings.const import kv15_database_connect
 
 class StopMessage():
     def _next_messagecodenumber(self):
-        try:
-            serial = int(open('/tmp/serial.txt', 'r').read()) + 1
-        except:
-            serial = 0
+        #try:
+        #    serial = int(open('/tmp/serial.txt', 'r').read()) + 1
+        #except:
+        #    serial = 0
 
-        open('/tmp/serial.txt', 'w').write(str(serial))
+        #open('/tmp/serial.txt', 'w').write(str(serial))
 
-        return serial
+        #return serial
 
-        # conn = psycopg2.connect(kv15_database_connect)
-        # cur = conn.cursor()
-        # cur.execute("""SELECT nextval('messagecodenumber');""")
-        # return cur.fetchall()[0][0]
+        conn = psycopg2.connect(kv15_database_connect)
+        cur = conn.cursor()
+        cur.execute("""SELECT nextval('messagecodenumber');""")
+        return cur.fetchall()[0][0]
 
     def __init__(self, dataownercode='openOV', messagecodedate=date.today(), messagecodenumber=None, userstopcodes=[], lineplanningnumbers=None, 
                  messagepriority=MessagePriority.PTPROCESS,messagetype=MessageType.GENERAL, messagedurationtype=MessageDurationType.ENDTIME, 
@@ -242,11 +242,15 @@ class StopMessage():
         return json.dumps(output)
 
     def save(self, conn=None):
+        conn_created = False
         if conn is None:
             conn = psycopg2.connect(kv15_database_connect)
-
+            conn_created = True
         cur = conn.cursor()
 
         cur.execute("""INSERT INTO KV15messages (dataownercode, messagetimestamp, messagecodedate, messagecodenumber, messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", (self.dataownercode, self.messagetimestamp.replace(microsecond=0).isoformat(), self.messagecodedate, self.messagecodenumber, self.messagepriority, self.messagetype, self.messagedurationtype, self.messagestarttime.replace(microsecond=0).isoformat(), self.messageendtime.replace(microsecond=0).isoformat(), self.messagecontent, self.reasontype, self.subreasontype, self.reasoncontent, self.effecttype, self.subeffecttype, self.effectcontent, self.measuretype, self.submeasuretype, self.measurecontent, self.advicetype, self.subadvicetype, self.advicecontent,))
         for userstopcode in self.userstopcodes:
-            cur.execute("""INSERT INTO KV15messages (dataownercode, messagecodedate, messagecodenumber, userstopcode) VALUES (%s, %s, %s, %s)""", (self.dataownercode, self.messagecodedate, self.messagecodenumber, userstopcode))
+            cur.execute("""INSERT INTO kv15_stopmessage_userstopcode (dataownercode, messagecodedate, messagecodenumber, userstopcode) VALUES (%s, %s, %s, %s)""", (self.dataownercode, self.messagecodedate, self.messagecodenumber, userstopcode))
+  
+        if conn_created:
+            conn.close()
