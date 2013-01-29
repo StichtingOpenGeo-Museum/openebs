@@ -41,72 +41,45 @@ class StopMessage():
         # cur.execute("""SELECT nextval('messagecodenumber');""")
         # return cur.fetchall()[0][0]
 
-    def __init__(self, dataownercode=None, messagecodedate=None, messagecodenumber=None, userstopcodes=None, lineplanningnumbers=None, messagepriority=None, messagetype=None, messagedurationtype=None, messagestarttime=None, messageendtime=None, messagecontent=None, reasontype=None, subreasontype=None, reasoncontent=None, effecttype=None, subeffecttype=None, effectcontent=None, measuretype=None, submeasuretype=None, measurecontent=None, advicetype=None, subadvicetype=None, advicecontent=None, messagetimestamp=None):
+    def __init__(self, dataownercode='openOV', messagecodedate=date.today(), messagecodenumber=None, userstopcodes=[], lineplanningnumbers=None, 
+                 messagepriority=MessagePriority.PTPROCESS,messagetype=MessageType.GENERAL, messagedurationtype=MessageDurationType.ENDTIME, 
+                 messagestarttime=datetime.now(), messageendtime=datetime.combine(date.today() + timedelta(days = 1), time(4, 0, 0)), messagecontent='', 
+                 reasontype=ReasonType.ONGEDEFINIEERD, subreasontype=SubReasonType.ONBEKEND, reasoncontent='', 
+                 effecttype=EffectType.ONGEDEFINIEERD, subeffecttype=SubEffectType.ONBEKEND, effectcontent='',
+                 measuretype=MeasureType.ONGEDEFINIEERD, submeasuretype=SubMeasureType.GEEN, measurecontent='',
+                 advicetype=AdviceType.ONGEDEFINIEERD, subadvicetype=SubAdviceType.GEEN, advicecontent='', messagetimestamp= datetime.now()):
 
-        if dataownercode is None:
-            self.dataownercode = 'openOV'
+        self.dataownercode = dataownercode
+        self.messagecodedate = date.today()
+        self.messagecodenumber = messagecodenumber
+        self.userstopcodes = userstopcodes
+        self.messagepriority = messagepriority
+        self.messagetype = messagetype
+        self.messagedurationtype = messagedurationtype
 
-        if messagecodedate is None:
-            self.messagecodedate = date.today()
+        self.messagestarttime = messagestarttime
+        self.messageendtime = messageendtime
 
-        if messagecodenumber is None:
-            self.messagecodenumber = None
+        self.messagecontent = messagecontent
 
-        if userstopcodes is None:
-            self.userstopcodes = []
-        else:
-            self.userstopcodes = userstopcodes
+        self.reasontype = reasontype
+        self.subreasontype = subreasontype
+        self.reasoncontent = reasoncontent
 
-        if messagepriority is None:
-            self.messagepriority = MessagePriority.PTPROCESS
 
-        if messagetype is None:
-            self.messagetype = MessageType.GENERAL
+        self.effecttype = effecttype
+        self.subeffecttype = subeffecttype
+        self.effectcontent = effectcontent
 
-        if messagedurationtype is None:
-            self.messagedurationtype = MessageDurationType.ENDTIME
+        self.measuretype = measuretype
+        self.submeasuretype = submeasuretype
+        self.measurecontent = measurecontent
 
-        if messagestarttime is None:
-            self.messagestarttime = datetime.now()
+        self.advicetype = advicetype
+        self.subadvicetype = subadvicetype
+        self.advicecontent = advicecontent
 
-        if messageendtime is None:
-            self.messageendtime = datetime.combine(date.today() + timedelta(days = 1), time(4, 0, 0))
-
-        if messagecontent is None:
-            self.messagecontent = ''
-        else:
-            self.messagecontent = messagecontent
-
-        if reasontype is None:
-            self.reasontype = ReasonType.ONGEDEFINIEERD
-        if subreasontype is None:
-            self.subreasontype = SubReasonType.ONBEKEND
-        if reasoncontent is None:
-            self.reasoncontent = ''
-
-        if effecttype is None:
-            self.effecttype = EffectType.ONGEDEFINIEERD
-        if subeffecttype is None:
-            self.subeffecttype = SubEffectType.ONBEKEND
-        if effectcontent is None:
-            self.effectcontent = ''
-
-        if measuretype is None:
-            self.measuretype = MeasureType.ONGEDEFINIEERD
-        if submeasuretype is None:
-            self.submeasuretype = SubMeasureType.GEEN
-        if measurecontent is None:
-            self.measurecontent = ''
-
-        if advicetype is None:
-            self.advicetype = AdviceType.ONGEDEFINIEERD
-        if subadvicetype is None:
-            self.subadvicetype = SubAdviceType.GEEN
-        if advicecontent is None:
-            self.advicecontent = ''
-
-        if messagetimestamp is None:
-            self.messagetimestamp = datetime.now()
+        self.messagetimestamp = messagetimestamp
 
     def __str__(self):
         if len(self.userstopcodes) == 0:
