@@ -41,16 +41,20 @@ class StopMessage():
         cur.execute("""SELECT nextval('messagecodenumber');""")
         return cur.fetchall()[0][0]
 
-    def __init__(self, dataownercode='openOV', messagecodedate=date.today(), messagecodenumber=None,userstopcodes=[], lineplanningnumbers=None, 
+    def __init__(self, dataownercode='openOV', messagecodedate=None, messagecodenumber=None,userstopcodes=[], lineplanningnumbers=None, 
                  messagepriority=MessagePriority.PTPROCESS,messagetype=MessageType.GENERAL, messagedurationtype=MessageDurationType.ENDTIME, 
-                 messagestarttime=datetime.now(), messageendtime=datetime.combine(date.today() + timedelta(days = 1), time(4, 0, 0)), messagecontent='', 
+                 messagestarttime=None, messageendtime=None, messagecontent='', 
                  reasontype=ReasonType.ONGEDEFINIEERD, subreasontype=SubReasonType.ONBEKEND, reasoncontent='', 
                  effecttype=EffectType.ONGEDEFINIEERD, subeffecttype=SubEffectType.ONBEKEND, effectcontent='',
                  measuretype=MeasureType.ONGEDEFINIEERD, submeasuretype=SubMeasureType.GEEN, measurecontent='',
-                 advicetype=AdviceType.ONGEDEFINIEERD, subadvicetype=SubAdviceType.GEEN, advicecontent='', messagetimestamp= datetime.now()):
+                 advicetype=AdviceType.ONGEDEFINIEERD, subadvicetype=SubAdviceType.GEEN, advicecontent='', messagetimestamp=None):
 
         self.dataownercode = dataownercode
-        self.messagecodedate = date.today()
+        if messagecodedate is None:
+            self.messagecodedate = date.today()
+        else:
+            self.messagecodedate = messagecodedate
+
         if messagecodenumber is None:
             self.messagecodenumber = self._next_messagecodenumber()
         else:
@@ -60,8 +64,14 @@ class StopMessage():
         self.messagetype = messagetype
         self.messagedurationtype = messagedurationtype
 
-        self.messagestarttime = messagestarttime
-        self.messageendtime = messageendtime
+        if messagestarttime is None:
+            self.messagestarttime = datetime.now()
+        else:
+            self.messagestarttime = messagestarttime
+        if messageendtime is None:
+            self.messageendtime = datetime.combine(date.today() + timedelta(days = 1), time(4, 0, 0))
+        else:
+            self.messageendtime = messageendtime
 
         self.messagecontent = messagecontent
 
@@ -81,8 +91,11 @@ class StopMessage():
         self.advicetype = advicetype
         self.subadvicetype = subadvicetype
         self.advicecontent = advicecontent
-
-        self.messagetimestamp = messagetimestamp
+        
+        if messagetimestamp is None:
+            self.messagetimestamp = datetime.now()
+        else:
+            self.messagetimestamp = messagetimestamp
 
     def __str__(self):
         if len(self.userstopcodes) == 0:
@@ -209,19 +222,19 @@ class StopMessage():
         if conn is None:
             conn = psycopg2.connect(kv15_database_connect)
 
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
-        cur.execute("""select dataownercode, messagecodedate, messagecodenumber, 
+        cur.execute("""select dataownercode, cast(messagecodedate as text), cast(messagecodenumber as int), 
         (select string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
         (select string_agg(lineplanningnumber, '|') as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
-        messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent, messagetimestamp
-        from kv15_stopmessage where dataownercode = %s AND scenario IS NULL LIMIT 50;""", (dataownercode,));
+        messagepriority, messagetype, messagedurationtype, cast(messagestarttime as text), cast(messageendtime as text), messagecontent, cast(reasontype as int), subreasontype, reasoncontent, cast(effecttype as int), subeffecttype, effectcontent, cast(measuretype as int),submeasuretype, measurecontent, cast(advicetype as int), subadvicetype, advicecontent, cast(messagetimestamp as text)
+        from kv15_stopmessage where dataownercode = %s AND scenario IS NULL ORDER by (current_timestamp < messageendtime) DESC ,messagetimestamp DESC LIMIT 50;""", (dataownercode,));
 
         output = cur.fetchall()
         for row in output:
             row['userstopcodes'] = row['userstopcodes'].split('|')
-            row['lineplanningnumbers'] = row['lineplanningnumbers'].split('|')
-
+            if row['lineplanningnumbers'] is not None:
+                row['lineplanningnumbers'] = row['lineplanningnumbers'].split('|')
         return json.dumps(output)
     
     def overview_scenario(self, dataownercode, conn=None):
@@ -234,13 +247,14 @@ class StopMessage():
                        string_agg(userstopcodes, '|') as userstopcodes, string_agg(lineplanningnumbers, '|') as lineplanningnumbers
                        from
                        (select dataownercode, messagecodedate, messagecodenumber, scenario,
-                       (select string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
+                       (select string_agg(userstopcode, '|') as userstopcodes from kv14_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
                        (select string_agg(lineplanningnumber, '|') as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber) from kv15_stopmessage where dataownercode = %s AND scenario IS NOT NULL) AS X GROUP BY dataownercode, scenario ORDER BY scenario;""", (dataownercode,));
 
         output = cur.fetchall()
         for row in output:
             row['userstopcodes'] = row['userstopcodes'].split('|')
-            row['lineplanningnumbers'] = row['lineplanningnumbers'].split('|')
+            if row['lineplanningnumbers'] is not None:
+                row['lineplanningnumbers'] = row['lineplanningnumbers'].split('|')
 
         return json.dumps(output)
 
@@ -254,6 +268,17 @@ class StopMessage():
         cur.execute("""INSERT INTO kv15_stopmessage (dataownercode, messagetimestamp, messagecodedate, messagecodenumber, messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", (self.dataownercode, self.messagetimestamp.replace(microsecond=0).isoformat(), self.messagecodedate, self.messagecodenumber, self.messagepriority, self.messagetype, self.messagedurationtype, self.messagestarttime.replace(microsecond=0).isoformat(), self.messageendtime.replace(microsecond=0).isoformat(), self.messagecontent, self.reasontype, self.subreasontype, self.reasoncontent, self.effecttype, self.subeffecttype, self.effectcontent, self.measuretype, self.submeasuretype, self.measurecontent, self.advicetype, self.subadvicetype, self.advicecontent,))
         for userstopcode in self.userstopcodes:
             cur.execute("""INSERT INTO kv15_stopmessage_userstopcode (dataownercode, messagecodedate, messagecodenumber, userstopcode) VALUES (%s, %s, %s, %s)""", (self.dataownercode, self.messagecodedate, self.messagecodenumber, userstopcode))
-        conn.commit()  
         if conn_created:
+            conn.commit()
+            conn.close()
+
+    def log(self,conn=None,author=None,message=None):
+        conn_created = False
+        if conn is None:
+            conn = psycopg2.connect(kv15_database_connect)
+            conn_created = True
+        cur = conn.cursor()
+        cur.execute("""INSERT INTO kv15_log (dataownercode,messagecodedate,messagecodenumber,author,message) VALUES (%s,%s,%s,%s,%s)""",[self.dataownercode,self.messagecodedate,self.messagecodenumber,author,message])
+        if conn_created:
+            conn.commit()
             conn.close()
