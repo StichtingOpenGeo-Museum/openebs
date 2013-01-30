@@ -2,16 +2,18 @@ import helper
 import uwsgi
 import cgi
 import datetime
+import psycopg2
 from datetime import date
 from kv78turbo.render import renderLines, getLines as cacheLines
 from kv78turbo.journeypatternizer import getLines
 from enum.messagepriority import MessagePriority
 from enum.messagetype import MessageType
 from enum.domain import auth_lookup
-from settings.const import remote
+from settings.const import remote,kv15_database_connect
 from datetime import datetime
 from kv15.stopmessage import StopMessage
 from kv15.kv15messages import KV15messages
+from kv15.deletemessage import DeleteMessage
 
 COMMON_HEADERS = [('Content-Type', 'application/json'), ('Access-Control-Allow-Origin', '*'), ('Access-Control-Allow-Headers', 'Requested-With,Content-Type')]
 COMMON_HEADERS_TEXT = [('Content-Type', 'text/plain'), ('Access-Control-Allow-Origin', '*'), ('Access-Control-Allow-Headers', 'Requested-With,Content-Type')]
@@ -94,7 +96,7 @@ def openebs(environ, start_response):
         dataownercode = auth_lookup[domain.lower()]
     except:
         return notfound(start_response)
-
+    author = environ['REMOTE_USER']
     if url == '/update':
         renderLinePages(dataownercode)
 
@@ -106,6 +108,36 @@ def openebs(environ, start_response):
             reply = StopMessage().overview_scenario(dataownercode)
             start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
             return reply
+    elif url == '/KV15deletemessages':
+         if environ['REQUEST_METHOD'] == 'POST':
+            post_env = environ.copy()
+            post_env['QUERY_STRING'] = ''
+            post = cgi.FieldStorage(fp=environ['wsgi.input'], environ=post_env, keep_blank_values=False)
+            messagecodedate = None
+            messagecodenumber = None
+            if 'messagecodedate' not in post:
+                return badrequest(start_response, 'Geen messagecodedate ingevuld')
+            else:
+                messagecodedate = post['messagecodedate'].value
+
+            if 'messagecodenumber' not in post:
+                return badrequest(start_response, 'Geen messagecodenumber ingevuld')
+            else:
+                messagecodenumber = post['messagecodenumber'].value
+            
+            msg = DeleteMessage(dataownercode=dataownercode, messagecodedate=messagecodedate, messagecodenumber=messagecodenumber)
+            kv15 = KV15messages(stopmessages = [msg])
+
+            conn = psycopg2.connect(kv15_database_connect)
+            kv15.save(conn=conn)
+            kv15.log(conn=conn,author=author,message='DELETE')
+            kv15.push(remote, '/RIG/KV15messages')
+            conn.commit()
+            conn.close()
+            reply = 'Bericht verwijderd'
+            start_response('200 OK', COMMON_HEADERS_TEXT + [('Content-length', str(len(reply)))])
+            return reply
+            
 
     elif url == '/KV15messages':
         if environ['REQUEST_METHOD'] == 'GET':
@@ -114,6 +146,7 @@ def openebs(environ, start_response):
             return reply
 
         elif environ['REQUEST_METHOD'] == 'POST':
+            kv15 = None
             post_env = environ.copy()
             post_env['QUERY_STRING'] = ''
             post = cgi.FieldStorage(fp=environ['wsgi.input'], environ=post_env, keep_blank_values=False)
@@ -134,7 +167,7 @@ def openebs(environ, start_response):
                 return badrequest(start_response, 'Bericht ontbreekt')
 
             msg = StopMessage(dataownercode=dataownercode, userstopcodes=userstopcodes, messagecontent=post['messagecontent'].value)
-
+            msg.timestamp = datetime.now()
             if 'messagepriority' in post:
                 if MessagePriority().validate(post['messagepriority'].value):
                     msg.messagepriority = post['messagepriority'].value
@@ -170,10 +203,14 @@ def openebs(environ, start_response):
                 else:
                     return badrequest(start_reponse, 'MessageScenario kan niet worden gevalideerd')            
             else:     
+                conn = psycopg2.connect(kv15_database_connect)
+                kv15.save(conn=conn)
+                kv15.log(conn=conn,author=author,message='PUBLISH')
                 kv15.push(remote, '/RIG/KV15messages')
-
-            reply = 'ok'
-            start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
+                conn.commit()
+                conn.close()
+            reply = 'Bericht verstuurd'
+            start_response('200 OK', COMMON_HEADERS_TEXT + [('Content-length', str(len(reply)))])
             return reply
     return notfound(start_response)
 
