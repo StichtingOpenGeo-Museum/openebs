@@ -1,0 +1,30 @@
+.fw { width: 3.5em; }
+.btn-fixed button { width: 8em; }
+
+html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        overflow:hidden;
+      }
+      #all {
+        margin-top: 40px;
+        width:100%;
+        height:100%;
+      }
+      #tab {
+        width:100%;
+        height:100%;
+     }
+      #map {
+        width:100%;
+        height:100%;
+     }
+
+ img.olTileImage { max-width: none; }
+ #map .olControlLayerSwitcher { display: none; }
+ #map .olControlZoomPanel { display: none; }
+ #map .olControlPanPanel { display: none; }
+ #berichten td { font-size: x-small; min-width: 6em; }
