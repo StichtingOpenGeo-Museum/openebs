@@ -41,6 +41,18 @@ class DeleteMessage():
 
 		cur = conn.cursor()
 
-		cur.execute("""UPDATE KV15_stopmessage SET messageendtime = now() WHERE dataownercode = %s AND messagecodedate = %s AND messagecodenumber = %s;""", self.dataownercode, self.messagecodedate, self.messagecodenumber)
+		cur.execute("""UPDATE KV15_stopmessage SET messageendtime = now() WHERE dataownercode = %s AND messagecodedate = %s AND messagecodenumber = %s;""",[self.dataownercode, self.messagecodedate, self.messagecodenumber])
                 if conn_created:
                         conn.close()
+
+        def log(self,conn=None,author=None,message=None):
+            conn_created = False
+            if conn is None:
+                conn = psycopg2.connect(kv15_database_connect)
+                conn_created = True
+            cur = conn.cursor()
+            cur.execute("""INSERT INTO kv15_log (timestamp,dataownercode,messagecodedate,messagecodenumber,author,message) VALUES (%s,%s,%s,%s,%s,%s)""",[datetime.now(),self.dataownercode,self.messagecodedate,self.messagecodenumber,author,message])
+            if conn_created:
+                conn.commit()
+                conn.close()
+
