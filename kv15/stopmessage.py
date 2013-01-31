@@ -35,7 +35,6 @@ class StopMessage():
         #open('/tmp/serial.txt', 'w').write(str(serial))
 
         #return serial
-
         conn = psycopg2.connect(kv15_database_connect)
         cur = conn.cursor()
         cur.execute("""SELECT nextval('messagecodenumber');""")
@@ -55,10 +54,7 @@ class StopMessage():
         else:
             self.messagecodedate = messagecodedate
 
-        if messagecodenumber is None:
-            self.messagecodenumber = self._next_messagecodenumber()
-        else:
-            self.messagecodenumber = messagecodenumber
+        self.messagecodenumber = messagecodenumber
         self.userstopcodes = userstopcodes
         self.messagepriority = messagepriority
         self.messagetype = messagetype
@@ -264,6 +260,8 @@ class StopMessage():
             conn = psycopg2.connect(kv15_database_connect)
             conn_created = True
         cur = conn.cursor()
+        if self.messagecodenumber is None:
+            self.messagecodenumber = self._next_messagecodenumber()
 
         cur.execute("""INSERT INTO kv15_stopmessage (dataownercode, messagetimestamp, messagecodedate, messagecodenumber, messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", (self.dataownercode, self.messagetimestamp.replace(microsecond=0).isoformat(), self.messagecodedate, self.messagecodenumber, self.messagepriority, self.messagetype, self.messagedurationtype, self.messagestarttime.replace(microsecond=0).isoformat(), self.messageendtime.replace(microsecond=0).isoformat(), self.messagecontent, self.reasontype, self.subreasontype, self.reasoncontent, self.effecttype, self.subeffecttype, self.effectcontent, self.measuretype, self.submeasuretype, self.measurecontent, self.advicetype, self.subadvicetype, self.advicecontent,))
         for userstopcode in self.userstopcodes:
@@ -278,7 +276,7 @@ class StopMessage():
             conn = psycopg2.connect(kv15_database_connect)
             conn_created = True
         cur = conn.cursor()
-        cur.execute("""INSERT INTO kv15_log (dataownercode,messagecodedate,messagecodenumber,author,message) VALUES (%s,%s,%s,%s,%s)""",[self.dataownercode,self.messagecodedate,self.messagecodenumber,author,message])
+        cur.execute("""INSERT INTO kv15_log (timestamp,dataownercode,messagecodedate,messagecodenumber,author,message) VALUES (%s,%s,%s,%s,%s,%s)""",[datetime.now(),self.dataownercode,self.messagecodedate,self.messagecodenumber,author,message])
         if conn_created:
             conn.commit()
             conn.close()
