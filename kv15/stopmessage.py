@@ -223,7 +223,8 @@ class StopMessage():
         cur.execute("""select dataownercode, cast(messagecodedate as text), cast(messagecodenumber as int), 
         (select string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
         (select string_agg(lineplanningnumber, '|') as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
-        messagepriority, messagetype, messagedurationtype, cast(messagestarttime as text), cast(messageendtime as text), messagecontent, cast(reasontype as int), subreasontype, reasoncontent, cast(effecttype as int), subeffecttype, effectcontent, cast(measuretype as int),submeasuretype, measurecontent, cast(advicetype as int), subadvicetype, advicecontent, cast(messagetimestamp as text)
+        messagepriority, messagetype, messagedurationtype, to_char(messagestarttime, 'DD-MM-IYYY HH24:MI:SS') as messagestarttime,to_char(messageendtime, 'DD-MM-IYYY HH24:MI:SS') as messageendtime, messagecontent, cast(reasontype as int), subreasontype, reasoncontent, 
+        cast(effecttype as int), subeffecttype, effectcontent, cast(measuretype as int),submeasuretype, measurecontent, cast(advicetype as int), subadvicetype, advicecontent, cast(messagetimestamp as text)
         from kv15_stopmessage where dataownercode = %s AND scenario IS NULL ORDER by (current_timestamp < messageendtime) DESC ,messagetimestamp DESC LIMIT 50;""", (dataownercode,));
 
         output = cur.fetchall()
