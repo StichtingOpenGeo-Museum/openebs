@@ -9,5 +9,6 @@ auth_lookup = {
     'opengeo.nl': 'OPENOV',
     'qbuzz.nl': 'QBUZZ',
     'ret.nl': 'RET',
-    'syntus.nl': 'SYNTUS'
+    'syntus.nl': 'SYNTUS',
+    'veolia.nl' : 'VTN'
 }
