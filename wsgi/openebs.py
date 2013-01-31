@@ -14,6 +14,7 @@ from datetime import datetime
 from kv15.stopmessage import StopMessage
 from kv15.kv15messages import KV15messages
 from kv15.deletemessage import DeleteMessage
+from kv78turbo.kv7api import querylines,querylinesperstop,querystopinline
 
 COMMON_HEADERS = [('Content-Type', 'application/json'), ('Access-Control-Allow-Origin', '*'), ('Access-Control-Allow-Headers', 'Requested-With,Content-Type')]
 COMMON_HEADERS_TEXT = [('Content-Type', 'text/plain'), ('Access-Control-Allow-Origin', '*'), ('Access-Control-Allow-Headers', 'Requested-With,Content-Type')]
@@ -97,7 +98,23 @@ def openebs(environ, start_response):
     except:
         return notfound(start_response)
     author = environ['REMOTE_USER']
-    if url == '/update':
+
+    if url == '/stops/line':
+        reply = querylinesperstop(dataownercode)
+        start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
+        return reply
+    elif '/stops/line/' in url:
+        arguments = url.split('/')
+        reply = querystopinline(dataownercode,arguments[3])
+        start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
+        return reply
+    
+    elif url == '/line':
+        reply = querylines(dataownercode)
+        start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
+        return reply
+
+    elif url == '/update':
         renderLinePages(dataownercode)
 
     elif url == '/berichten.html':
@@ -123,8 +140,10 @@ def openebs(environ, start_response):
             if 'messagecodenumber' not in post:
                 return badrequest(start_response, 'Geen messagecodenumber ingevuld')
             else:
-                messagecodenumber = post['messagecodenumber'].value
-            
+                try:
+                    messagecodenumber = int(post['messagecodenumber'].value)
+                except:
+                    return badrequest(start_response,'Messagecodenumber geen integer')
             msg = DeleteMessage(dataownercode=dataownercode, messagecodedate=messagecodedate, messagecodenumber=messagecodenumber)
             kv15 = KV15messages(stopmessages = [msg])
 
@@ -167,7 +186,6 @@ def openebs(environ, start_response):
                 return badrequest(start_response, 'Bericht ontbreekt')
 
             msg = StopMessage(dataownercode=dataownercode, userstopcodes=userstopcodes, messagecontent=post['messagecontent'].value)
-            msg.timestamp = datetime.now()
             if 'messagepriority' in post:
                 if MessagePriority().validate(post['messagepriority'].value):
                     msg.messagepriority = post['messagepriority'].value
