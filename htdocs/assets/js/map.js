@@ -7,7 +7,6 @@ var projection = new OpenLayers.Projection("EPSG:28992"); // Transform from WGS 
  */
 var vectors = new OpenLayers.Layer.Vector("Haltes",
 {
-/* strategies: [new OpenLayers.Strategy.Cluster({ distance: 15, threshold: 2 })],*/
  strategies: [new OpenLayers.Strategy.OVCluster({ distance: 15, threshold: 2 })],
  styleMap: new OpenLayers.StyleMap({
     "default": new OpenLayers.Style(OpenLayers.Util.applyDefaults({
@@ -44,7 +43,6 @@ var stops_features = [];
 var line_stops_features = [];
 
 function selectStop(feature) {
-    console.log(feature);
     if (feature.cluster){
         for (var i in feature.cluster){
             feature.cluster[i].renderIntent = "select";
@@ -57,7 +55,6 @@ function selectStop(feature) {
 }
 
 function unselectStop(e) {
-    console.log(e);
     if (vectors.selectedFeatures.length == 0 && !$("#btnNieuwBericht").hasClass('disabled')) {
         $("#btnNieuwBericht").addClass('disabled');
         $("#btnNieuwBericht").removeAttr("data-toggle");
