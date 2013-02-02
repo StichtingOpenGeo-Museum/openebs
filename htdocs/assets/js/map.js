@@ -45,7 +45,7 @@ var line_stops_features = [];
 function selectStop(feature) {
     if (feature.cluster){
         for (var i in feature.cluster){
-            feature.cluster[i].renderIntent = "select";
+            feature.cluster[i].renderIntent = feature.renderIntent;
         }
     }
     if ($("#btnNieuwBericht").hasClass('disabled')) {
@@ -54,7 +54,12 @@ function selectStop(feature) {
     }
 }
 
-function unselectStop(e) {
+function unselectStop(feature) {
+    if (feature.cluster){
+        for (var i in feature.cluster){
+            feature.cluster[i].renderIntent = feature.renderIntent;
+        }
+    }
     if (vectors.selectedFeatures.length == 0 && !$("#btnNieuwBericht").hasClass('disabled')) {
         $("#btnNieuwBericht").addClass('disabled');
         $("#btnNieuwBericht").removeAttr("data-toggle");
