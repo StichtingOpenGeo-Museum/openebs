@@ -7,7 +7,8 @@ var projection = new OpenLayers.Projection("EPSG:28992"); // Transform from WGS 
  */
 var vectors = new OpenLayers.Layer.Vector("Haltes",
 {
- strategies: [new OpenLayers.Strategy.Cluster({ distance: 15, threshold: 2 })],
+/* strategies: [new OpenLayers.Strategy.Cluster({ distance: 15, threshold: 2 })],*/
+ strategies: [new OpenLayers.Strategy.OVCluster({ distance: 15, threshold: 2 })],
  styleMap: new OpenLayers.StyleMap({
     "default": new OpenLayers.Style(OpenLayers.Util.applyDefaults({
         externalGraphic: 'assets/img/bus-12.png',
@@ -43,6 +44,12 @@ var stops_features = [];
 var line_stops_features = [];
 
 function selectStop(feature) {
+    console.log(feature);
+    if (feature.cluster){
+        for (var i in feature.cluster){
+            feature.cluster[i].renderIntent = "select";
+        }
+    }
     if ($("#btnNieuwBericht").hasClass('disabled')) {
         $("#btnNieuwBericht").removeClass('disabled');
         $("#btnNieuwBericht").attr("data-toggle", "modal");
@@ -50,9 +57,11 @@ function selectStop(feature) {
 }
 
 function unselectStop(e) {
+    console.log(e);
     if (vectors.selectedFeatures.length == 0 && !$("#btnNieuwBericht").hasClass('disabled')) {
         $("#btnNieuwBericht").addClass('disabled');
         $("#btnNieuwBericht").removeAttr("data-toggle");
+        // berichten = null;
     }
 }
 
@@ -63,7 +72,29 @@ function addStop(key, value) {
 }
 
 function showLine(lineid) {
-    $.getJSON('http://www.opentripplanner.nl:1344/stops/line/'+lineid.replace('_', '/'), function(data) {
+    if (lineid === undefined) {
+        vectors.removeAllFeatures();
+        vectors.addFeatures(stops_features);
+        unselectStop();
+    } else {
+    $('#lijnen').load('/assets/lines/'+lineid+'.html', function () {
+        /* TODO: deze code even abstract maken met showlines */
+        for (var key in berichten) {
+            n = berichten[key];
+            if (n['isactive']) {
+                $.each(n['userstopcodes'], function(key2, m) {
+                    var stop = $('#'+n['dataownercode']+'_'+m);
+                    if (stop !== undefined) {
+                        stop.removeAttr("data-toggle");
+                        stop.removeClass('btn-primary');
+                        stop.addClass('btn-warning disabled');
+                        stop.attr('title', n['messagecontent']);
+                    }
+                });
+            }
+        }
+    });
+    $.getJSON('/stops/line/'+lineid.split('_')[1], function(data) {
         line_stops_features = [];
         $.each(data, function(key, value) {
             var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(value.x, value.y), {active: false, key: key, name: value.name, lines: value.lines});
@@ -71,8 +102,11 @@ function showLine(lineid) {
         });
         vectors.removeAllFeatures();
         vectors.addFeatures(line_stops_features);
+        unselectStop();
 /*        map.zoomToExtent(vectors.getDataExtent());*/
     } );
+
+    }
 }
 
 // initialise the 'map' object
@@ -110,12 +144,22 @@ function initopenlayers() {
     map.addControl(selectCtrl);
 
     selectCtrl.activate();
-             $.getJSON('/htm.json', function(data) {
+             $.getJSON('/stops/line', function(data) {
                 stops = data;
                 stops_features = [];
                 $.each(stops, addStop);
                 vectors.addFeatures(stops_features);
             } );
+
+            $.getJSON('/line', function(data) {
+                $.each(data, function(transporttype, value) {
+                    $("#lijnen-"+transporttype).empty();
+                    $.each(value, function(key, value) {
+                        $("#lijnen-"+transporttype).append("<a class='btn' style='width: 1em;' onClick='showLine(\""+value.id+"\");' title='"+value.name+"'>"+value.linenr+"</a>");
+                    });
+                });
+            });
+
 
     // center map
     if (!map.getCenter()) {
