@@ -10,12 +10,10 @@
     <link href="assets/css/bootstrap.css" rel="stylesheet">
     <link href="assets/css/openebs2.css" rel="stylesheet">
     <link href="assets/css/datepicker.css" rel="stylesheet">
-    <link href="assets/Leaflet/leaflet.css" rel="stylesheet" />
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-      <link rel="stylesheet" href="assets/Leaflet/leaflet.ie.css" />
     <![endif]-->
 
     <!-- Le fav and touch icons -->
@@ -52,6 +50,9 @@
               <li>
                 <a class="page" href="#scenario" data-toggle="tab">Scenario</a>
               </li>
+              <li>
+                <a class="page" href="#" onClick="return signout();" id="username" title="Uitloggen">Uitloggen</a>
+              </li>
             </ul>
 	    <form class="navbar-form pull-right">
 	      <span><a class='toggleToMap btn btn-success btn-normal disabled' href="#nieuwBerichtModal" id="btnNieuwBericht" onClick="return false;">Nieuw Bericht</a></span>
@@ -64,23 +65,26 @@
 
 <div id="map" class="map">&nbsp;</div>
     <div id="lijnenpanel" style="position: absolute; left: 0px; top: 40px; z-index: 1000;">
-      <div class="btn-group btn-group-vertical" id="lijnen-BUS" style="float: left; margin: 2px;"></div>
+      <div class="btn-group btn-group-vertical" style="float: left; margin: 2px; clear: both;"><a class='btn' style='width: 62px; z-index: 1000;' onClick='showLine();'>Alle lijnen</a></div>
+      <div class="btn-group btn-group-vertical" id="lijnen-BUS" style="float: left; margin: 2px; clear: both;"></div>
       <div class="btn-group btn-group-vertical" id="lijnen-TRAM" style="float: left; margin: 2px;"></div>
       <div class="btn-group btn-group-vertical" id="lijnen-BOAT" style="float: left; margin: 2px;"></div>
    </div>
 
-
-<div id="all" class="tab-content" style="position: absolute; top: 0px; right: 0; width: 50%;">
+<div id="all" class="tab-content" style="position: absolute; top: 0px; right: 0px; width: 50%;">
+    <div style="width: 100%; height: 40px;"></div>
     <div id="berichten" class="tab-pane" style="">
-        <table class="table table-hover">
-            <tr><th>Begintijd</th><th>Eindtijd</th><th>Bericht</th><th>Aantal haltes</th><th></th></tr>
+        <div id="berichtenAlert"></div>
+        <table class="table table-hover table-striped">
+            <tr><th>Begintijd</th><th>Eindtijd</th><th>Bericht</th><th>Haltes</th><th style="width: 100px;"></th></tr>
         </table>
     </div>
     <div id="lijnen" class="tab-pane">
     </div>
     <div id="scenario" class="tab-pane" style="">
+        <div id="scenarioAlert"></div>
         <table class="table table-hover">
-            <tr><th>Scenario</th><th>Aantal haltes</th><th>Gebruiker</th><th></th></tr>
+            <tr><th>Scenario</th><th>Haltes</th><th></th></tr>
         </table>
     </div>
 </div>
@@ -92,7 +96,6 @@
 <div class="tab-pane" id="berichten">
 <table class="table table-hover">
 <tr><th>Begintijd</th><th>Eindtijd</th><th>Bericht</th><th>Aantal haltes</th><th></th></tr>
-<tr><td>14-12-2012 11:00:00</td><td>14-12-2012 11:00:00</td><td>Test Bericht</td><td>1</td><td><button class="btn btn-success btn-mini" onclick=""><i class="icon-refresh icon-white"></i></button> <button class="btn btn-danger btn-mini" onclick="" style="float: right;"><i class="icon-trash icon-white"></i></button></td></tr>
 </table>
 </div>
 
@@ -116,6 +119,9 @@
               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
               <h3 id="myModalLabel">Nieuw Bericht</h3>
             </div>
+       <div id="basket">
+             <select multiple="multiple" id="stopBasket"></select>
+       </div>
             <div class="modal-body">
   <form class="form-horizontal">
       <input type="hidden" name="stops" value="" id="stops" />
@@ -130,7 +136,7 @@
       <div class="control-group">
         <label class="control-label" for="messagetype">Soort</label>
         <div class="controls">
-       <div id="messagetype" class="btn-group btn-fixed" data-toggle="buttons-radio"><button name="messagetype" value="GENERAL" type="button" class-toggle="btn-success" class="btn btn-mini active btn-success" title="Algemeen bericht dat getoond wordt op de onderste regel van det display. Overschrijft de eventuele aanwezige ritinformatie op de onderste regel.">Algemeen</button><button name="messagetype" value="ADDITIONAL" type="button" class-toggle="btn-success" class="btn btn-mini" title="Tekst die getoond wordt op de onderste regel van het display in geval dat de regel niet in gebruik is voor het tonen van ritinformatie.">Extra</button><button name="messagetype" value="OVERRULE" type="button" class-toggle="btn-success" class="btn btn-mini" title="Tekst die op het gehele display getoond wordt. Vervangt eventueel andere getoonde informatie.">Overschrijf</button><button name="messagetype" value="BOTTOMLINE" type="button" class-toggle="btn-success" class="btn btn-mini" title="Tekst die op de onderste regels van het display wordt. De overgebleven display regels tonen ritinformatie.">Onderaan</button></div>
+       <div id="messagetype" class="btn-group btn-fixed" data-toggle="buttons-radio"><button name="messagetype" value="GENERAL" type="button" class-toggle="btn-success" class="btn btn-mini active btn-success" title="Algemeen bericht dat getoond wordt op de onderste regel van det display. Overschrijft de eventuele aanwezige ritinformatie op de onderste regel.">Algemeen</button><button name="messagetype" value="ADDITIONAL" type="button" class-toggle="btn-success" class="btn btn-mini" title="Tekst die getoond wordt op de onderste regel van het display in geval dat de regel niet in gebruik is voor het tonen van ritinformatie.">Extra</button><button name="messagetype" value="OVERRULE" type="button" class-toggle="btn-danger" class="btn btn-mini" title="Tekst die op het gehele display getoond wordt. Vervangt eventueel andere getoonde informatie.">Overschrijf</button><button name="messagetype" value="BOTTOMLINE" type="button" class-toggle="btn-success" class="btn btn-mini" title="Tekst die op de onderste regels van het display wordt. De overgebleven display regels tonen ritinformatie.">Onderaan</button></div>
           <p class="help-block">Locatie van het te tonen bericht.</p>
         </div>
       </div>
@@ -157,14 +163,13 @@
         </div>
       </div>
 
-      <div class="control-group" style="display: none">
+      <div id="auth_messagescenario" class="control-group" style="display: none">
         <label class="control-label" for="messagescenario">Scenario</label>
         <div class="controls">
        <input id="messagescenario" type="text" class="input-xlarge" maxlength="255" />
-            <p class="help-block">Naam van het scenario, om later te plannen.</p>
+            <p class="help-block" style="margin-top: 0;">Naam van het scenario, om later te plannen.</p>
         </div>
       </div>
-
   </form>
 
             </div>
@@ -176,16 +181,16 @@
           </div>
 
 
-
             </div>
 
 
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+    <!-- <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script> --> 
     <script type="text/javascript" src="assets/js/proj4js-compressed.js"></script>
     <script type="text/javascript" src="assets/js/OpenLayers.js"></script>
+    <script type="text/javascript" src="assets/js/OpenLayers-OVcluster.js"></script>
     <script type="text/javascript" src="assets/js/jquery.js"></script>
     <script type="text/javascript" src="assets/js/datepicker.js"></script>
     <script type="text/javascript" src="assets/js/jquery.qtip-1.0.0-rc3.min.js"></script>
@@ -195,10 +200,13 @@
     <script type="text/javascript" src="assets/js/kv15.js"></script>
     <script>
 
+    var authorization = null;
+
        $(document).ready(function() {
         $.ajaxSetup({cache:false});
         initopenlayers();
         $(".limit").limit({ maxChars: 255, warnChars: 78, counter: "#counter" });
+        updateBerichten();
 
 $('.btn-group > .btn, .btn[data-toggle="button"]').click(function() {
 
@@ -226,32 +234,25 @@ $('.btn-group > .btn, .btn[data-toggle="button"]').click(function() {
 
        });
 
-
+            $.getJSON('/settings.js', function(auth) {
+                authorization = auth;
+                if (authorization['scenario_create'] === true) { $("#auth_messagescenario").attr('style', ''); }
+                $("#username").html(authorization['username']);
+            });
 
        $('a[data-toggle="tab"]').on('show', function (e) {
          if ($(e.target).attr('href') == '#map') {
             $('#map').css('width', '100%');
-            $('#lijnenpanel').hide();
-
-            vectors.addFeatures(stops_features);
          } else if ($(e.target).attr('href') == '#lijnen') {
-            $('#map').css('width', '100%');
-            $.getJSON('http://www.opentripplanner.nl:1344/line/HTM', function(data) {
-                $.each(data, function(transporttype, value) {
-                    $("#lijnen-"+transporttype).empty();
-                    $.each(value, function(key, value) {
-                        $("#lijnen-"+transporttype).append("<a class='btn' style='width: 1em;' onClick='showLine(\""+value.id+"\");' title='"+value.name+"'>"+value.linenr+"</a>");
-                    });
-                });
-            });
-            $('#lijnenpanel').show();
+            $('#map').css('width', '50%');
          } else {
             if ($(e.target).attr('href') == '#berichten') {
                 updateBerichten();
+            } else if ($(e.target).attr('href') == '#scenario') {
+                updateScenario();
             }
 
             $('#map').css('width', '50%');
-            $('#lijnenpanel').hide();
          }
        });
 
@@ -266,6 +267,13 @@ $('.btn-group > .btn, .btn[data-toggle="button"]').click(function() {
 	   $("#nieuw-submit").text('Opslaan');
 	}
       });
+
+      function signout() {
+        $.ajax({type: "GET", url: "https://uitloggen@openebs.nl", dataType: "html"})
+        .fail(function (data) {
+            document.location = 'http://htm.net';
+        })
+      }
 
     </script>
   </body>

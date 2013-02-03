@@ -10,7 +10,6 @@ html, body {
         overflow:hidden;
       }
       #all {
-        margin-top: 40px;
         width:100%;
         height:100%;
       }
@@ -28,3 +27,19 @@ html, body {
  #map .olControlZoomPanel { display: none; }
  #map .olControlPanPanel { display: none; }
  #berichten td { font-size: x-small; min-width: 6em; }
+
+ td.right { float: left; }
+ td.left { float: right; }
+
+ #nieuwBerichtModal{
+    width: 1000px;
+    margin: -300px 0 0 -500px;
+ }
+
+ #stopBasket { 
+    position: absolute;
+    right: 0;
+    width: 400px;
+    height: 396px;
+    z-index : 3000;
+ }

@@ -23,9 +23,6 @@ var vectors = new OpenLayers.Layer.Vector("Haltes",
         graphicWidth: 24
     })})}
 );
-
-
-
   
   
 /*function(key, value) {
@@ -42,11 +39,49 @@ var stops = {};
 var stops_features = [];
 var line_stops_features = [];
 
+function getStopFeature(stop_id){
+   for (var i in vectors.features){
+       feature = vectors.features[i];
+       if (feature.cluster){
+           for (var j in feature.cluster){
+               if (feature.cluster[j].attributes.key == stop_id){
+                   return feature.cluster[j];
+               }
+           }
+       }else if (feature.attributes.key == stop_id){
+           return feature;
+       }
+   }
+   return null;
+}
+
+function getStopCluster(stop_id){
+   for (var i in vectors.features){
+       feature = vectors.features[i];
+       if (feature.cluster){
+           for (var j in feature.cluster){
+               if (feature.cluster[j].attributes.key == stop_id){
+                   return feature;
+               }
+           }
+       }else if (feature.attributes.key == stop_id){
+           return feature;
+       }
+   }
+   return null;
+}
+
 function selectStop(feature) {
     if (feature.cluster){
         for (var i in feature.cluster){
-            feature.cluster[i].renderIntent = feature.renderIntent;
+            clust = feature.cluster[i];
+            clust.renderIntent = feature.renderIntent;
+            $("#stopBasket").find("#"+clust.attributes.key).remove();
+            $("#stopBasket").append('<option id="'+clust.attributes.key+'">'+clust.attributes.name+' ('+clust.attributes.key.split("_")[1] +')</option>');
         }
+    }else{
+        $("#stopBasket").find("#"+feature.attributes.key).remove();
+        $("#stopBasket").append('<option id="'+feature.attributes.key+'">'+feature.attributes.name+' ('+feature.attributes.key.split("_")[1] +')</option>');
     }
     if ($("#btnNieuwBericht").hasClass('disabled')) {
         $("#btnNieuwBericht").removeClass('disabled');
@@ -55,10 +90,13 @@ function selectStop(feature) {
 }
 
 function unselectStop(feature) {
-    if (feature.cluster){
+    if (feature && feature.cluster){
         for (var i in feature.cluster){
             feature.cluster[i].renderIntent = feature.renderIntent;
+            $("#stopBasket").find("#"+feature.cluster[i].attributes.key).remove();
         }
+    }else if (feature){
+        $("#stopBasket").find("#"+feature.attributes.key).remove();
     }
     if (vectors.selectedFeatures.length == 0 && !$("#btnNieuwBericht").hasClass('disabled')) {
         $("#btnNieuwBericht").addClass('disabled');
