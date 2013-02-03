@@ -22,7 +22,7 @@ class Push:
 
         xml = """<VV_TM_PUSH xmlns="%(namespace)s">
 <SubscriberID>%(subscriberid)s</SubscriberID>
-<Version>8.1.0.1</Version>
+<Version>BISON 8.1.0.0</Version>
 <DossierName>%(dossiername)s</DossierName>
 <Timestamp>%(timestamp)s</Timestamp>
 %(content)s
@@ -39,12 +39,14 @@ class Push:
         if send:
             conn = HTTPConnection(remote)
             conn.request("POST", path, content, {"Content-type": "application/xml"})
-            response = conn.getresponse().read()
+            response = conn.getresponse()
+            response_code = response.status
+            response_content = response.read()
             conn.close()
             if debug:
-                print response
+                print response_content
 
-        if store and response is not None and 'ResponseCode>OK<' in response:
-            self.content.save()
+        #if store and response is not None and 'ResponseCode>OK<' in response:
+        #    self.content.save()
 
-        return response
+        return (response_code,response_content)
