@@ -35,7 +35,7 @@ class Push:
         content = str(self)
         if debug:
             print content
-
+        response_code = -1
         if send:
             conn = HTTPConnection(remote)
             conn.request("POST", path, content, {"Content-type": "application/xml"})
