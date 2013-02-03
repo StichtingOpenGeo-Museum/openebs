@@ -151,8 +151,8 @@ function patternSelectStop(element){
     var feature = getStopFeature(id);
     if (element.hasClass('btn-success')){
         feature.renderIntent = 'default';
-        element.removeClass('btn-success active');
-        element.addClass('btn-primary active');
+        element.removeClass('btn-success');
+        element.addClass('btn-primary');
         $("#stopBasket").find("#"+id).remove();
         if ($("#stopBasket").children().length == 0 && !$("#btnNieuwBericht").hasClass('disabled')) {
             $("#btnNieuwBericht").addClass('disabled');
@@ -162,7 +162,7 @@ function patternSelectStop(element){
         $("#stopBasket").find("#"+id).remove();
         $("#stopBasket").append('<option id="'+id+'">'+element.text()+' ('+id.split("_")[1] +')</option>');
         feature.renderIntent = 'select';
-        element.addClass('btn-success active');
+        element.addClass('btn-success');
         if ($("#btnNieuwBericht").hasClass('disabled')) {
             $("#btnNieuwBericht").removeClass('disabled');
             $("#btnNieuwBericht").attr("data-toggle", "modal");
