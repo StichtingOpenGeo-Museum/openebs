@@ -18,6 +18,15 @@ function userStopCodesInBasket(){
    return stops;
 };
 
+$('#nieuwBerichtModal').on('show', function () {
+    var selectedFeatures = getSelectedFeatures();
+    for (var i in selectedFeatures){
+        var feature = selectedFeatures[i];
+        $("#stopBasket").find("#"+feature.attributes.key).remove();
+        $("#stopBasket").append('<option id="'+feature.attributes.key+'">'+feature.attributes.name+' ('+feature.attributes.key.split("_")[1] +')</option>');
+    }
+});
+
 //Enable deletion from the basket with selected stops
 $( '#stopBasket' ).on( 'keydown', function( event ) {
     if (event.keyCode != 46 || $('#stopBasket').children().length <= 1){
