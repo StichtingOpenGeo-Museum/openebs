@@ -39,13 +39,13 @@
           <div class="nav-collapse collapse">
             <ul class="nav">
               <li class="active">
-                <a class="page" href="#map" data-toggle="tab">openebs</a>
+                <a class="page" href="#map" id="tab-openebs" data-toggle="tab">openebs</a>
               </li>
               <li>
                 <a class="page" href="#berichten" data-toggle="tab">Berichten</a>
               </li>
               <li>
-                <a class="page" href="#lijnen" data-toggle="tab">Lijnen</a>
+                <a class="page" href="#lijnen" id="tab-lijnen" data-toggle="tab">Lijnen</a>
               </li>
               <li>
                 <a class="page" href="#scenario" data-toggle="tab">Scenario</a>
@@ -55,6 +55,7 @@
               </li>
             </ul>
 	    <form class="navbar-form pull-right">
+              <span><a class='toggleToMap btn btn-warning btn-normal disabled' href="#clearSelectie" id="btnLeegSelectie" onClick="clearSelection()">Leeg selectie</a></span>
 	      <span><a class='toggleToMap btn btn-success btn-normal disabled' href="#nieuwBerichtModal" id="btnNieuwBericht" onClick="return false;">Nieuw Bericht</a></span>
 	      <span><a class='toggleToMap btn btn-danger btn-normal disabled' href="#wijzigingModal" onClick="return false;">Wijzig Dienst</a></span>
             </form>
@@ -65,21 +66,21 @@
 
 <div id="map" class="map">&nbsp;</div>
     <div id="lijnenpanel" style="position: absolute; left: 0px; top: 40px; z-index: 1000;">
-      <div class="btn-group btn-group-vertical" style="float: left; margin: 2px; clear: both;"><a class='btn' style='width: 62px; z-index: 1000;' onClick='showLine();'>Alle lijnen</a></div>
+      <div class="btn-group btn-group-vertical" style="float: left; margin: 2px; clear: both;"><a class='btn' style='width: 62px; z-index: 1000;' onClick='showLine();'>Alle haltes</a></div>
       <div class="btn-group btn-group-vertical" id="lijnen-BUS" style="float: left; margin: 2px; clear: both;"></div>
       <div class="btn-group btn-group-vertical" id="lijnen-TRAM" style="float: left; margin: 2px;"></div>
       <div class="btn-group btn-group-vertical" id="lijnen-BOAT" style="float: left; margin: 2px;"></div>
    </div>
 
-<div id="all" class="tab-content" style="position: absolute; top: 0px; right: 0px; width: 50%;">
-    <div style="width: 100%; height: 40px;"></div>
+<div style="position: absolute; width: 50%; top: 40px; bottom: 0px; right: 0px;">
+<div id="all" class="tab-content" style="position: absolute; top: 0px; right: 0px; overflow: auto;">
     <div id="berichten" class="tab-pane" style="">
         <div id="berichtenAlert"></div>
         <table class="table table-hover table-striped">
             <tr><th>Begintijd</th><th>Eindtijd</th><th>Bericht</th><th>Haltes</th><th style="width: 100px;"></th></tr>
         </table>
     </div>
-    <div id="lijnen" class="tab-pane">
+    <div id="lijnen" class="tab-pane" style="float: right;">
     </div>
     <div id="scenario" class="tab-pane" style="">
         <div id="scenarioAlert"></div>
@@ -87,6 +88,7 @@
             <tr><th>Scenario</th><th>Haltes</th><th></th></tr>
         </table>
     </div>
+</div>
 </div>
 
 <!--
@@ -182,6 +184,76 @@
 
 
             </div>
+  <div id="nieuwPlanningModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="nieuwPlanninglLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+
+      <h3 id="nieuwPlanningLabel">Nieuw Planning</h3>
+    </div>
+
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <input type="hidden" name="stops" value="" id="stops">
+
+        <div class="control-group">
+          <label class="control-label" for="messagestarttime">Begindatum</label>
+
+          <div class="controls">
+            <input id="messagestarttime" type="text" data-datepicker-format="dd-mm-yyyy">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="messageendtime">Einddatum</label>
+
+          <div class="controls">
+            <input id="messageendtime" type="text" data-datepicker-format="dd-mm-yyyy">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="messagestarttime">Begintijd</label>
+
+          <div class="controls">
+            <input id="messagestarttime" type="text" data-datepicker-format="hh:ii:ss">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="messageendtime">Eindtijd</label>
+
+          <div class="controls">
+            <input id="messageendtime" type="text" data-datepicker-format="hh:ii:ss">
+          </div>
+        </div>
+
+
+        <div class="control-group">
+          <label class="control-label" for="messagepriority">Prioriteit</label>
+
+          <div class="controls">
+            <div id="messagepriority" class="btn-group btn-fixed" data-toggle="buttons-checkbox">
+              <button name="messageweekday" value="1" type="button" class-toggle="btn-success" class="btn btn-mini" title="Maandag">Maandag</button>
+              <button name="messageweekday" value="2" type="button" class-toggle="btn-success" class="btn btn-mini" title="Dinsdag">Dinsdag</button>
+              <button name="messageweekday" value="3" type="button" class-toggle="btn-success" class="btn btn-mini" title="Woensdag">Woensdag</button>
+              <button name="messageweekday" value="4" type="button" class-toggle="btn-success" class="btn btn-mini" title="Donderdag">Donderdag</button>
+              <button name="messageweekday" value="5" type="button" class-toggle="btn-success" class="btn btn-mini" title="Vrijdag">Vrijdag</button>
+              <button name="messageweekday" value="6" type="button" class-toggle="btn-success" class="btn btn-mini" title="Zaterdag">Zaterdag</button>
+              <button name="messageweekday" value="0" type="button" class-toggle="btn-success" class="btn btn-mini" title="Zondag">Zondag</button>
+            </div>
+
+            <p class="help-block">Invloed op het operationeel proces.</p>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div id="nieuwPlanningModalAlert"></div>
+
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Sluit</button> <button class="btn btn-primary" id="nieuw-submit" onclick="kv15planningsubmit();">Plan</button>
+    </div>
+  </div>
 
 
     <!-- Le javascript
@@ -244,7 +316,7 @@ $('.btn-group > .btn, .btn[data-toggle="button"]').click(function() {
          if ($(e.target).attr('href') == '#map') {
             $('#map').css('width', '100%');
          } else if ($(e.target).attr('href') == '#lijnen') {
-            $('#map').css('width', '50%');
+		$('#map').css('width', ($(window).width() - $("#lijnen").width() + 15));
          } else {
             if ($(e.target).attr('href') == '#berichten') {
                 updateBerichten();
@@ -254,6 +326,10 @@ $('.btn-group > .btn, .btn[data-toggle="button"]').click(function() {
 
             $('#map').css('width', '50%');
          }
+       });
+
+       $('a[data-toggle="tab"]#tab-lijnen').on('shown', function (e) {
+       	$('#map').css('width', ($(window).width() - $("#lijnen").width() + 15));
        });
 
       $('#input-scenario').keyup(function() {
