@@ -71,8 +71,8 @@ function clearSelection(){
    $(stopBasket).empty();
    $("#lijnen").find(".active").removeClass("btn-success active");
    refreshMap();
-   $("#btnNieuwBericht").removeClass('disabled');
-   $("#btnLeegSelectie").removeClass('disabled');
+   $("#btnNieuwBericht").addClass('disabled');
+   $("#btnLeegSelectie").addClass('disabled');
    $("#btnNieuwBericht").attr("data-toggle", "modal");
 }
 
