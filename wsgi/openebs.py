@@ -3,14 +3,16 @@ import uwsgi
 import cgi
 import datetime
 import psycopg2
+import json
 from datetime import date
 from kv78turbo.render import renderLines, getLines as cacheLines
 from kv78turbo.journeypatternizer import getLines
 from enum.messagepriority import MessagePriority
 from enum.messagetype import MessageType
 from enum.domain import auth_lookup
+from enum.authorization import authorization
 from settings.const import remote,kv15_database_connect
-from datetime import datetime
+from datetime import datetime,timedelta
 from kv15.stopmessage import StopMessage
 from kv15.kv15messages import KV15messages
 from kv15.deletemessage import DeleteMessage
@@ -18,6 +20,7 @@ from kv78turbo.kv7api import querylines,querylinesperstop,querystopinline
 
 COMMON_HEADERS = [('Content-Type', 'application/json'), ('Access-Control-Allow-Origin', '*'), ('Access-Control-Allow-Headers', 'Requested-With,Content-Type')]
 COMMON_HEADERS_TEXT = [('Content-Type', 'text/plain'), ('Access-Control-Allow-Origin', '*'), ('Access-Control-Allow-Headers', 'Requested-With,Content-Type')]
+COMMON_HEADERS_HTML = [('Content-Type', 'text/html'), ('Access-Control-Allow-Origin', '*'), ('Access-Control-Allow-Headers', 'Requested-With,Content-Type')]
 
 def templateLijnen(content):
     template = open('templates/lijnen.html').read()
@@ -77,13 +80,26 @@ def badrequest(start_response, error):
     start_response('400 Bad Request', COMMON_HEADERS_TEXT + [('Content-length', str(len(error)))])
     yield error
 
+def forbidden(start_response, error):
+    start_response('403 Forbidden', COMMON_HEADERS_TEXT + [('Content-length', str(len(error)))])
+    yield error
+
 def authenticate(start_response):
     start_response('401 Unauthorized', COMMON_HEADERS_TEXT + [('Content-length', '19'), ('WWW-Authenticate', 'Basic realm="openebs.nl"')])
     yield 'Niet geauthoriseerd'
 
+#def signout(start_response):
+#    reply = '<html><head><meta http-equiv="refresh" content="1; URL=https://www.openebs.nl/"></head><body>U bent uitgelogd</body></html>'
+#    start_response('401 Logout', COMMON_HEADERS_HTML + [('Content-length', str(len(reply))), ('WWW-Authenticate', 'Invalidate, Basic realm="logout"')])
+#    yield reply
+
+
 def openebs(environ, start_response):
     url = environ['PATH_INFO']
     dataownercode = None
+
+#    if url == '/uitloggen':
+#    	return signout(start_response)
 
     if 'REMOTE_USER' not in environ and 'HTTP_AUTHORIZATION' not in environ:
         return authenticate(start_response)
@@ -98,6 +114,9 @@ def openebs(environ, start_response):
     except:
         return notfound(start_response)
     author = environ['REMOTE_USER']
+    auth_author = {'scenario_create': False}
+    if author in authorization:
+        auth_author = authorization[author]
 
     if url == '/stops/line':
         reply = querylinesperstop(dataownercode)
@@ -119,6 +138,12 @@ def openebs(environ, start_response):
 
     elif url == '/berichten.html':
         renderKV15messages(dataownercode)
+
+    elif url == '/settings.js':
+        reply = json.dumps(dict(auth_author.items() + [('username', author)]))
+
+        start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
+        return reply
 
     elif url == '/KV15scenarios':
          if environ['REQUEST_METHOD'] == 'GET':
@@ -201,14 +226,16 @@ def openebs(environ, start_response):
             if 'messagestarttime' in post:
                 try:
                     msg.messagestarttime = datetime.strptime(post['messagestarttime'].value, '%Y-%m-%dT%H:%M:%S')
+                    if msg.messagestarttime > (datetime.now() + timedelta(hours=72)):
+                        return badrequest(start_response, 'MessageStartTime kan niet 72 uur in de toekomst liggen')                    
                 except:
-                    return badrequest(start_reponse, 'MessageStartTime kan niet worden gevalideerd')
+                    return badrequest(start_response, 'MessageStartTime kan niet worden gevalideerd')
             
             if 'messageendtime' in post:
                 try:
                     msg.messageendtime = datetime.strptime(post['messageendtime'].value, '%Y-%m-%dT%H:%M:%S')
                 except:
-                    return badrequest(start_reponse, 'MessageEndTime kan niet worden gevalideerd')
+                    return badrequest(start_response, 'MessageEndTime kan niet worden gevalideerd')
 
             if msg.messagestarttime >= msg.messageendtime:
                 return badrequest(start_response, 'MessageStartTime later of gelijk aan MessageEndTime')
@@ -216,10 +243,16 @@ def openebs(environ, start_response):
             kv15 = KV15messages(stopmessages = [msg])
 
             if 'messagescenario' in post:
-                if len(post['messagescenario']) > 0:
-                    kv15.store(post['messagescenario'])
+                if 'scenario_create' in auth_author and auth_author['scenario_create']:
+                    if len(post['messagescenario'].value) > 0:
+		    	conn = psycopg2.connect(kv15_database_connect)
+			kv15.save(conn=conn, messagescenario=post['messagescenario'].value)
+			conn.commit()
+			conn.close()
+                    else:
+                        return badrequest(start_response, 'MessageScenario kan niet worden gevalideerd')            
                 else:
-                    return badrequest(start_reponse, 'MessageScenario kan niet worden gevalideerd')            
+                    return forbidden(start_response, 'U heeft geen rechten om een scenario te maken')
             else:     
                 conn = psycopg2.connect(kv15_database_connect)
                 kv15.save(conn=conn)

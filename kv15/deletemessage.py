@@ -33,7 +33,7 @@ class DeleteMessage():
 
 		return xml
 
-	def save(self, conn=None):
+        def save(self, conn=None, messagescenario=None):
                 conn_created = False
                 if conn is None:
                         conn = psycopg2.connect(kv15_database_connect)

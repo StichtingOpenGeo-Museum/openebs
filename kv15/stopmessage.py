@@ -238,7 +238,7 @@ cast(effecttype as int), subeffecttype, effectcontent, cast(measuretype as int),
 measurecontent, cast(advicetype as int), subadvicetype, advicecontent, cast(messagetimestamp as text),(current_timestamp < messageendtime) as 
 isactive
 FROM kv15_stopmessage
-WHERE dataownercode = %s AND scenario IS NULL AND (current_timestamp < messageendtime)
+WHERE dataownercode = %s AND messagescenario IS NULL AND (current_timestamp < messageendtime)
 UNION
 (SELECT 
 dataownercode,
@@ -257,7 +257,7 @@ cast(effecttype as int), subeffecttype, effectcontent, cast(measuretype as int),
 measurecontent, cast(advicetype as int), subadvicetype, advicecontent, cast(messagetimestamp as text),(current_timestamp < messageendtime) as 
 isactive
 FROM kv15_stopmessage
-WHERE dataownercode = %s AND scenario IS NULL AND (current_timestamp > messageendtime) LIMIT 50)
+WHERE dataownercode = %s AND messagescenario IS NULL AND (current_timestamp > messageendtime) LIMIT 50)
 ORDER by isactive DESC ,messagetimestamp DESC""", (dataownercode,dataownercode));
 
         output = cur.fetchall()
@@ -271,14 +271,14 @@ ORDER by isactive DESC ,messagetimestamp DESC""", (dataownercode,dataownercode))
         if conn is None:
             conn = psycopg2.connect(kv15_database_connect)
 
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
-        cur.execute("""select dataownercode, scenario,
+        cur.execute("""select dataownercode, messagescenario,
                        string_agg(userstopcodes, '|') as userstopcodes, string_agg(lineplanningnumbers, '|') as lineplanningnumbers
                        from
-                       (select dataownercode, messagecodedate, messagecodenumber, scenario,
-                       (select string_agg(userstopcode, '|') as userstopcodes from kv14_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
-                       (select string_agg(lineplanningnumber, '|') as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber) from kv15_stopmessage where dataownercode = %s AND scenario IS NOT NULL) AS X GROUP BY dataownercode, scenario ORDER BY scenario;""", (dataownercode,));
+                       (select dataownercode, messagecodedate, messagecodenumber, messagescenario,
+                       (select string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
+                       (select string_agg(lineplanningnumber, '|') as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber) from kv15_stopmessage where dataownercode = %s AND messagescenario IS NOT NULL) AS X GROUP BY dataownercode, messagescenario ORDER BY messagescenario;""", (dataownercode,));
 
         output = cur.fetchall()
         for row in output:
@@ -288,7 +288,7 @@ ORDER by isactive DESC ,messagetimestamp DESC""", (dataownercode,dataownercode))
 
         return json.dumps(output)
 
-    def save(self, conn=None):
+    def save(self, conn=None, messagescenario=None):
         conn_created = False
         if conn is None:
             conn = psycopg2.connect(kv15_database_connect)
@@ -297,7 +297,11 @@ ORDER by isactive DESC ,messagetimestamp DESC""", (dataownercode,dataownercode))
         if self.messagecodenumber is None:
             self.messagecodenumber = self._next_messagecodenumber()
 
-        cur.execute("""INSERT INTO kv15_stopmessage (dataownercode, messagetimestamp, messagecodedate, messagecodenumber, messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", (self.dataownercode, self.messagetimestamp.replace(microsecond=0).isoformat(), self.messagecodedate, self.messagecodenumber, self.messagepriority, self.messagetype, self.messagedurationtype, self.messagestarttime.replace(microsecond=0).isoformat(), self.messageendtime.replace(microsecond=0).isoformat(), self.messagecontent, self.reasontype, self.subreasontype, self.reasoncontent, self.effecttype, self.subeffecttype, self.effectcontent, self.measuretype, self.submeasuretype, self.measurecontent, self.advicetype, self.subadvicetype, self.advicecontent,))
+	if messagescenario is None:
+	        cur.execute("""INSERT INTO kv15_stopmessage (dataownercode, messagetimestamp, messagecodedate, messagecodenumber, messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", (self.dataownercode, self.messagetimestamp.replace(microsecond=0).isoformat(), self.messagecodedate, self.messagecodenumber, self.messagepriority, self.messagetype, self.messagedurationtype, self.messagestarttime.replace(microsecond=0).isoformat(), self.messageendtime.replace(microsecond=0).isoformat(), self.messagecontent, self.reasontype, self.subreasontype, self.reasoncontent, self.effecttype, self.subeffecttype, self.effectcontent, self.measuretype, self.submeasuretype, self.measurecontent, self.advicetype, self.subadvicetype, self.advicecontent,))
+	else:
+	        cur.execute("""INSERT INTO kv15_stopmessage (dataownercode, messagetimestamp, messagecodedate, messagecodenumber, messagepriority, messagetype, messagedurationtype, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent, messagescenario) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", (self.dataownercode, self.messagetimestamp.replace(microsecond=0).isoformat(), self.messagecodedate, self.messagecodenumber, self.messagepriority, self.messagetype, self.messagedurationtype, self.messagecontent, self.reasontype, self.subreasontype, self.reasoncontent, self.effecttype, self.subeffecttype, self.effectcontent, self.measuretype, self.submeasuretype, self.measurecontent, self.advicetype, self.subadvicetype, self.advicecontent, messagescenario))
+
         for userstopcode in self.userstopcodes:
             cur.execute("""INSERT INTO kv15_stopmessage_userstopcode (dataownercode, messagecodedate, messagecodenumber, userstopcode) VALUES (%s, %s, %s, %s)""", (self.dataownercode, self.messagecodedate, self.messagecodenumber, userstopcode))
         if conn_created:
