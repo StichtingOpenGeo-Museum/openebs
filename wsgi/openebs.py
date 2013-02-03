@@ -93,6 +93,7 @@ def authenticate(start_response):
 #    start_response('401 Logout', COMMON_HEADERS_HTML + [('Content-length', str(len(reply))), ('WWW-Authenticate', 'Invalidate, Basic realm="logout"')])
 #    yield reply
 
+stopinline_cache = {}
 
 def openebs(environ, start_response):
     url = environ['PATH_INFO']
@@ -124,7 +125,13 @@ def openebs(environ, start_response):
         return reply
     elif '/stops/line/' in url:
         arguments = url.split('/')
-        reply = querystopinline(dataownercode,arguments[3])
+        # temp fix, while waiting for linedirection in KV7network, query will be fast enough then
+        key = dataownercode+'_'+arguments[3]
+        if key in stopinline_cache:
+            reply = stopinline_cache[key]
+        else:
+            reply = querystopinline(dataownercode,arguments[3])
+            stopinline_cache[key] = reply
         start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
         return reply
     
