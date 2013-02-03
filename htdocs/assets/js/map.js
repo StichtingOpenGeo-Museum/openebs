@@ -100,14 +100,14 @@ function selectStop(feature) {
             $("#stopBasket").find("#"+clust.attributes.key).remove();
             $("#stopBasket").append('<option id="'+clust.attributes.key+'">'+clust.attributes.name+' ('+clust.attributes.key.split("_")[1] +')</option>');
             var button = $("#lijnen").find('#'+clust.attributes.key)
-            if (button && !button.hasClass('disabled')){
+            if (button)){
                 button.addClass("btn-success active");
             }
         }
     }else{
         $("#stopBasket").find("#"+feature.attributes.key).remove();
         var button = $("#lijnen").find('#'+feature.attributes.key);
-        if (button && !button.hasClass('disabled')){
+        if (button){
            button.addClass("btn-success active");
         }
         $("#stopBasket").append('<option id="'+feature.attributes.key+'">'+feature.attributes.name+' ('+feature.attributes.key.split("_")[1] +')</option>');
