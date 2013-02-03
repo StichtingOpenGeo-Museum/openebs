@@ -146,7 +146,6 @@ function addStop(key, value) {
 
 function patternSelectStop(element){
     element = $(element);
-    console.log(element.text());
     var id = element.attr('id');
     var feature = getStopFeature(id);
     if (element.hasClass('btn-success')){
