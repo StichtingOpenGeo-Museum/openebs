@@ -11,14 +11,14 @@ from enum.messagepriority import MessagePriority
 from enum.messagetype import MessageType
 from enum.domain import auth_lookup
 from enum.authorization import authorization
-from settings.const import remote,kv15_database_connect
+from settings.const import remote,remote_path,kv15_database_connect
 from datetime import datetime,timedelta
 from kv15.stopmessage import StopMessage
 from kv15.kv15messages import KV15messages
 from kv15.deletemessage import DeleteMessage
 from kv78turbo.kv7api import querylines,querylinesperstop,querystopinline
 
-COMMON_HEADERS = [('Content-Type', 'application/json'), ('Access-Control-Allow-Origin', '*'), ('Access-Control-Allow-Headers', 'Requested-With,Content-Type')]
+COMMON_HEADERS_JSON = [('Content-Type', 'application/json'), ('Access-Control-Allow-Origin', '*'), ('Access-Control-Allow-Headers', 'Requested-With,Content-Type')]
 COMMON_HEADERS_TEXT = [('Content-Type', 'text/plain'), ('Access-Control-Allow-Origin', '*'), ('Access-Control-Allow-Headers', 'Requested-With,Content-Type')]
 COMMON_HEADERS_HTML = [('Content-Type', 'text/html'), ('Access-Control-Allow-Origin', '*'), ('Access-Control-Allow-Headers', 'Requested-With,Content-Type')]
 
@@ -121,7 +121,7 @@ def openebs(environ, start_response):
 
     if url == '/stops/line':
         reply = querylinesperstop(dataownercode)
-        start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
+        start_response('200 OK', COMMON_HEADERS_JSON + [('Content-length', str(len(str(reply)))),])
         return reply
     elif '/stops/line/' in url:
         arguments = url.split('/')
@@ -132,12 +132,12 @@ def openebs(environ, start_response):
         else:
             reply = querystopinline(dataownercode,arguments[3])
             stopinline_cache[key] = reply
-        start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
+        start_response('200 OK', COMMON_HEADERS_JSON + [('Content-length', str(len(str(reply)))),])
         return reply
     
     elif url == '/line':
         reply = querylines(dataownercode)
-        start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
+        start_response('200 OK', COMMON_HEADERS_JSON + [('Content-length', str(len(str(reply)))),])
         return reply
 
     elif url == '/update':
@@ -149,13 +149,13 @@ def openebs(environ, start_response):
     elif url == '/settings.js':
         reply = json.dumps(dict(auth_author.items() + [('username', author)]))
 
-        start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
+        start_response('200 OK', COMMON_HEADERS_JSON + [('Content-length', str(len(str(reply)))),])
         return reply
 
     elif url == '/KV15scenarios':
          if environ['REQUEST_METHOD'] == 'GET':
             reply = StopMessage().overview_scenario(dataownercode)
-            start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
+            start_response('200 OK', COMMON_HEADERS_JSON + [('Content-length', str(len(str(reply)))),])
             return reply
     elif url == '/KV15deletemessages':
          if environ['REQUEST_METHOD'] == 'POST':
@@ -182,18 +182,18 @@ def openebs(environ, start_response):
             conn = psycopg2.connect(kv15_database_connect)
             kv15.save(conn=conn)
             kv15.log(conn=conn,author=author,message='DELETE')
-            kv15.push(remote, '/RIG/KV15messages')
+            kv15.push(remote, remote_path)
             conn.commit()
             conn.close()
             reply = 'Bericht verwijderd'
-            start_response('200 OK', COMMON_HEADERS_TEXT + [('Content-length', str(len(reply)))])
+            start_response('200 OK', COMMON_HEADERS_TEXT + [('Content-length', str(len(reply))),])
             return reply
             
 
     elif url == '/KV15messages':
         if environ['REQUEST_METHOD'] == 'GET':
             reply = StopMessage().overview(dataownercode)
-            start_response('200 OK', COMMON_HEADERS + [('Content-length', str(len(str(reply)))), ('Content-type', 'application/json')])
+            start_response('200 OK', COMMON_HEADERS_JSON + [('Content-length', str(len(str(reply)))),])
             return reply
 
         elif environ['REQUEST_METHOD'] == 'POST':
@@ -264,7 +264,7 @@ def openebs(environ, start_response):
                 conn = psycopg2.connect(kv15_database_connect)
                 kv15.save(conn=conn)
                 kv15.log(conn=conn,author=author,message='PUBLISH')
-                kv15.push(remote, '/RIG/KV15messages')
+                kv15.push(remote, remote_path)
                 conn.commit()
                 conn.close()
             reply = 'Bericht verstuurd'
