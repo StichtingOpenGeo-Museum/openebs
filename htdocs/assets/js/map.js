@@ -103,14 +103,14 @@ function selectStop(feature) {
             $("#stopBasket").append('<option id="'+clust.attributes.key+'">'+clust.attributes.name+' ('+clust.attributes.key.split("_")[1] +')</option>');
             var button = $("#lijnen").find('#'+clust.attributes.key)
             if (button && !button.hasClass('disabled')){
-                button.addClass("btn-success");
+                button.addClass("btn-success active");
             }
         }
     }else{
         $("#stopBasket").find("#"+feature.attributes.key).remove();
         var button = $("#lijnen").find('#'+feature.attributes.key);
         if (button && !button.hasClass('disabled')){
-           button.addClass("btn-success");
+           button.addClass("btn-success active");
         }
         $("#stopBasket").append('<option id="'+feature.attributes.key+'">'+feature.attributes.name+' ('+feature.attributes.key.split("_")[1] +')</option>');
     }
@@ -125,11 +125,11 @@ function unselectStop(feature) {
         for (var i in feature.cluster){
             feature.cluster[i].renderIntent = feature.renderIntent;
             $("#stopBasket").find("#"+feature.cluster[i].attributes.key).remove();
-            $("#lijnen").find('#'+feature.cluster[i].attributes.key).removeClass("btn-success");
+            $("#lijnen").find('#'+feature.cluster[i].attributes.key).removeClass("btn-success active");
         }
     }else if (feature){
         $("#stopBasket").find("#"+feature.attributes.key).remove();
-        $("#lijnen").find('#'+feature.attributes.key).removeClass("btn-success");
+        $("#lijnen").find('#'+feature.attributes.key).removeClass("btn-success active");
     }
     if ($("#stopBasket").children().length == 0 && !$("#btnNieuwBericht").hasClass('disabled')) {
         $("#btnNieuwBericht").addClass('disabled');
@@ -151,8 +151,8 @@ function patternSelectStop(element){
     var feature = getStopFeature(id);
     if (element.hasClass('btn-success')){
         feature.renderIntent = 'default';
-        element.removeClass('btn-success');
-        element.addClass('btn-primary');
+        element.removeClass('btn-success active');
+        element.addClass('btn-primary active');
         $("#stopBasket").find("#"+id).remove();
         if ($("#stopBasket").children().length == 0 && !$("#btnNieuwBericht").hasClass('disabled')) {
             $("#btnNieuwBericht").addClass('disabled');
@@ -162,7 +162,7 @@ function patternSelectStop(element){
         $("#stopBasket").find("#"+id).remove();
         $("#stopBasket").append('<option id="'+id+'">'+element.text()+' ('+id.split("_")[1] +')</option>');
         feature.renderIntent = 'select';
-        element.addClass('btn-success');
+        element.addClass('btn-success active');
         if ($("#btnNieuwBericht").hasClass('disabled')) {
             $("#btnNieuwBericht").removeClass('disabled');
             $("#btnNieuwBericht").attr("data-toggle", "modal");
@@ -189,11 +189,12 @@ function patternSelect(index) {
         $.each($(selector),function(index, value){ value.click(); });
 }
 
-function showLine(lineid) {
+function showLine(target, lineid) {
     if (lineid === undefined) {
         vectors.removeAllFeatures();
         vectors.addFeatures(stops_features);
         unselectStop();
+        $('#tab-openebs').tab('show');
     } else {
     $('#lijnen').load('/assets/lines/'+lineid+'.html', function (data) {
         /* TODO: deze code even abstract maken met showlines */
@@ -211,6 +212,9 @@ function showLine(lineid) {
                 });
             }
         }
+
+        $('#tab-lijnen').tab('show');
+        $('#map').css('width', ($(window).width() - ($("#lijnen").width() + 15)));
     });
     $.getJSON('/stops/line/'+lineid.split('_')[1], function(data) {
         line_stops_features = [];
@@ -223,7 +227,11 @@ function showLine(lineid) {
         unselectStop();
 /*        map.zoomToExtent(vectors.getDataExtent());*/
     } );
+    }
 
+    $("#lijnenpanel a").removeClass("btn-success active");
+    if (target !== undefined) {
+        $(target).addClass("btn-success active");
     }
 }
 
@@ -273,7 +281,7 @@ function initopenlayers() {
                 $.each(data, function(transporttype, value) {
                     $("#lijnen-"+transporttype).empty();
                     $.each(value, function(key, value) {
-                        $("#lijnen-"+transporttype).append("<a class='btn' style='width: 1em;' onClick='showLine(\""+value.id+"\");' title='"+value.name+"'>"+value.linenr+"</a>");
+                        $("#lijnen-"+transporttype).append("<a class='btn' style='width: 1em;' onClick='showLine(this, \""+value.id+"\");' title='"+value.name+"'>"+value.linenr+"</a>");
                     });
                 });
             });
