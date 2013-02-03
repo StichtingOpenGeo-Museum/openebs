@@ -208,13 +208,19 @@ def openebs(environ, start_response):
             post = cgi.FieldStorage(fp=environ['wsgi.input'], environ=post_env, keep_blank_values=False)
             userstopcodes = None
             if 'userstopcodes[]' in post:
+                print isinstance(post['userstopcodes[]'],list)
                 try:
-                    userstopcodes = [x.value.split('_')[1] for x in post['userstopcodes[]']]
+                    if isinstance(post['userstopcodes[]'],list):
+                        userstopcodes = [x.value.split('_')[1] for x in post['userstopcodes[]']]
+                        for x in post['userstopcodes[]']:
+                            if x.value.split('_')[0] != dataownercode:
+                                return badrequest(start_response, 'Userstopcodes buiten dataowner domein')
+                    else:
+                        userstopcodes = post['userstopcodes[]'].value.split('_')[1]
+                        if post['userstopcodes[]'].value.split('_')[0] != dataownercode:
+                            return badrequest(start_response, 'Userstopcode buiten dataowner domein')
                 except:
                     return badrequest(start_response, 'Fout in UserStopCodes formaat')
-                for x in post['userstopcodes[]']:
-                    if x.value.split('_')[0] != dataownercode:
-                        return badrequest(start_response, 'Userstopcodes buiten dataowner domein')
             else:
                 if 'userstopcodes[]' not in post:
                     return badrequest(start_response, 'UserStopCodes ontbreken')
