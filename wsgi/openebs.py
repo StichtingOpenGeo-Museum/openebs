@@ -183,7 +183,7 @@ def openebs(environ, start_response):
             kv15.save(conn=conn)
             kv15.log(conn=conn,author=author,message='DELETE')
             respcode, resp = kv15.push(remote, remote_path)
-            if '>OK</' in resp or not send:
+            if not send or '>OK</' in resp:
                 conn.commit()
                 conn.close()
             else:
@@ -270,7 +270,7 @@ def openebs(environ, start_response):
                 kv15.save(conn=conn)
                 kv15.log(conn=conn,author=author,message='PUBLISH')
                 respcode,resp = kv15.push(remote, remote_path)
-                if '>OK</' in resp or not send:
+                if not send or '>OK</' in resp:
                     conn.commit()
                     conn.close()
                 else:
