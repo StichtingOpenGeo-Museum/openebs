@@ -97,9 +97,9 @@ OpenLayers.Strategy.OVCluster = OpenLayers.Class(OpenLayers.Strategy.Cluster, {
      * result of a moveend event.
      */
      cluster: function(event) {
-        if((!event || event.zoomChanged) && this.features) {
+        if((!event || event.zoomChanged || (event && event.recluster)) && this.features) { 
             var resolution = this.layer.map.getResolution();
-            if(resolution != this.resolution || !this.clustersExist()) {
+            if(resolution != this.resolution || !this.clustersExist() || (event && event.recluster)) { 
                 this.resolution = resolution;
                 var clusters = [];
                 var feature, clustered, cluster;
