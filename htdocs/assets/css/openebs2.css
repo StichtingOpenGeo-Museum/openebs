@@ -32,14 +32,14 @@ html, body {
  td.left { float: right; }
 
  #nieuwBerichtModal{
-    width: 1000px;
-    margin: -300px 0 0 -500px;
+    width: 900px;
+    margin: -275px 0 0 -450px;
  }
 
  #stopBasket { 
     position: absolute;
     right: 0;
-    width: 400px;
+    width: 300px;
     height: 396px;
     z-index : 3000;
  }
