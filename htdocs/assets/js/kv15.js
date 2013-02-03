@@ -34,6 +34,12 @@ $( '#stopBasket' ).on( 'keydown', function( event ) {
     }
     var item = $(this).children("option").filter(":selected");
     item.remove();
+    var feature = getStopFeature(item.attr('id'));
+    $("#lijnen").find('#'+item.attr('id')).removeClass("btn-success active");
+    if (feature && feature.renderIntent == "select"){
+        feature.renderIntent = "default";
+        refreshMap();
+    }
 });
 
 function datetimetoxml(datetime) {
@@ -72,6 +78,7 @@ function haltesBericht(dataownercode, messagecodedate, messagecodenumber) {
 
         vectors.addFeatures(filtered_stops);
     }
+    $("#lijnenpanel a").removeClass("btn-success active");
 }
 
 function updateBerichten() {
