@@ -11,7 +11,7 @@ from enum.messagepriority import MessagePriority
 from enum.messagetype import MessageType
 from enum.domain import auth_lookup
 from enum.authorization import authorization
-from settings.const import remote,remote_path,kv15_database_connect
+from settings.const import remote,remote_path,kv15_database_connect,send
 from datetime import datetime,timedelta
 from kv15.stopmessage import StopMessage
 from kv15.kv15messages import KV15messages
@@ -182,9 +182,14 @@ def openebs(environ, start_response):
             conn = psycopg2.connect(kv15_database_connect)
             kv15.save(conn=conn)
             kv15.log(conn=conn,author=author,message='DELETE')
-            kv15.push(remote, remote_path)
-            conn.commit()
-            conn.close()
+            respcode, resp = kv15.push(remote, remote_path)
+            if '>OK</' in resp or not send:
+                conn.commit()
+                conn.close()
+            else:
+                conn.rollback()
+                conn.close()
+                return badrequest(start_response,resp)
             reply = 'Bericht verwijderd'
             start_response('200 OK', COMMON_HEADERS_TEXT + [('Content-length', str(len(reply))),])
             return reply
@@ -264,9 +269,14 @@ def openebs(environ, start_response):
                 conn = psycopg2.connect(kv15_database_connect)
                 kv15.save(conn=conn)
                 kv15.log(conn=conn,author=author,message='PUBLISH')
-                kv15.push(remote, remote_path)
-                conn.commit()
-                conn.close()
+                respcode,resp = kv15.push(remote, remote_path)
+                if '>OK</' in resp or not send:
+                    conn.commit()
+                    conn.close()
+                else:
+                    conn.rollback()
+                    conn.close()
+                    return badrequest(start_response,resp)
             reply = 'Bericht verstuurd'
             start_response('200 OK', COMMON_HEADERS_TEXT + [('Content-length', str(len(reply)))])
             return reply
