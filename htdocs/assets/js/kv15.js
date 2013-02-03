@@ -18,20 +18,12 @@ function userStopCodesInBasket(){
    return stops;
 };
 
+//Enable deletion from the basket with selected stops
 $( '#stopBasket' ).on( 'keydown', function( event ) {
     if (event.keyCode != 46 || $('#stopBasket').children().length <= 1){
         return;
     }
     var item = $(this).children("option").filter(":selected");
-    var feature = getStopFeature(item[0].id);
-    if (feature){
-        feature.renderIntent = "default";
-        var cluster = getStopCluster(item[0].id);
-        if (cluster){
-            cluster.renderIntent = "default";
-        }
-        vectors.refresh();
-    }
     item.remove();
 });
 

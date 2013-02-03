@@ -2,12 +2,12 @@ var map = null;
 var selectCtrl = null;
 
 var projection = new OpenLayers.Projection("EPSG:28992"); // Transform from WGS 1984
-
+var cluster_strategy = new OpenLayers.Strategy.OVCluster({ distance: 15, threshold: 2 })
 /* Reference: http://openflights.svn.sourceforge.net/viewvc/openflights/openflights/openflights.js
  */
 var vectors = new OpenLayers.Layer.Vector("Haltes",
 {
- strategies: [new OpenLayers.Strategy.OVCluster({ distance: 15, threshold: 2 })],
+ strategies: [cluster_strategy],
  styleMap: new OpenLayers.StyleMap({
     "default": new OpenLayers.Style(OpenLayers.Util.applyDefaults({
         externalGraphic: 'assets/img/bus-12.png',
@@ -55,6 +55,29 @@ function getStopFeature(stop_id){
    return null;
 }
 
+function getSelectedFeatures(){
+   selected = [];
+   for (var i in vectors.features){
+       feature = vectors.features[i];
+       if (feature.cluster){
+           for (var j in feature.cluster){
+               if (feature.cluster[j].renderIntent == "select"){
+                   selected.push(feature.cluster[j]);
+               }
+           }
+       }else if (feature.renderIntent == "select"){
+           selected.push(feature);
+       }
+   }
+   return selected
+}
+
+function refreshMap(){
+    cluster_strategy.recluster();
+    vectors.refresh();    
+    vectors.redraw();
+}
+
 function getStopCluster(stop_id){
    for (var i in vectors.features){
        feature = vectors.features[i];
@@ -78,9 +101,17 @@ function selectStop(feature) {
             clust.renderIntent = feature.renderIntent;
             $("#stopBasket").find("#"+clust.attributes.key).remove();
             $("#stopBasket").append('<option id="'+clust.attributes.key+'">'+clust.attributes.name+' ('+clust.attributes.key.split("_")[1] +')</option>');
+            var button = $("#lijnen").find('#'+clust.attributes.key)
+            if (button && !button.hasClass('disabled')){
+                button.addClass("btn-success");
+            }
         }
     }else{
         $("#stopBasket").find("#"+feature.attributes.key).remove();
+        var button = $("#lijnen").find('#'+feature.attributes.key);
+        if (button && !button.hasClass('disabled')){
+           button.addClass("btn-success");
+        }
         $("#stopBasket").append('<option id="'+feature.attributes.key+'">'+feature.attributes.name+' ('+feature.attributes.key.split("_")[1] +')</option>');
     }
     if ($("#btnNieuwBericht").hasClass('disabled')) {
@@ -94,11 +125,13 @@ function unselectStop(feature) {
         for (var i in feature.cluster){
             feature.cluster[i].renderIntent = feature.renderIntent;
             $("#stopBasket").find("#"+feature.cluster[i].attributes.key).remove();
+            $("#lijnen").find('#'+feature.cluster[i].attributes.key).removeClass("btn-success");
         }
     }else if (feature){
         $("#stopBasket").find("#"+feature.attributes.key).remove();
+        $("#lijnen").find('#'+feature.attributes.key).removeClass("btn-success");
     }
-    if (vectors.selectedFeatures.length == 0 && !$("#btnNieuwBericht").hasClass('disabled')) {
+    if ($("#stopBasket").children().length == 0 && !$("#btnNieuwBericht").hasClass('disabled')) {
         $("#btnNieuwBericht").addClass('disabled');
         $("#btnNieuwBericht").removeAttr("data-toggle");
         // berichten = null;
@@ -111,13 +144,58 @@ function addStop(key, value) {
     stops_features.push(feature);
 }
 
+function patternSelectStop(element){
+    element = $(element);
+    console.log(element.text());
+    var id = element.attr('id');
+    var feature = getStopFeature(id);
+    if (element.hasClass('btn-success')){
+        feature.renderIntent = 'default';
+        element.removeClass('btn-success');
+        element.addClass('btn-primary');
+        $("#stopBasket").find("#"+id).remove();
+        if ($("#stopBasket").children().length == 0 && !$("#btnNieuwBericht").hasClass('disabled')) {
+            $("#btnNieuwBericht").addClass('disabled');
+            $("#btnNieuwBericht").removeAttr("data-toggle");
+        }
+    }else{
+        $("#stopBasket").find("#"+id).remove();
+        $("#stopBasket").append('<option id="'+id+'">'+element.text()+' ('+id.split("_")[1] +')</option>');
+        feature.renderIntent = 'select';
+        element.addClass('btn-success');
+        if ($("#btnNieuwBericht").hasClass('disabled')) {
+            $("#btnNieuwBericht").removeClass('disabled');
+            $("#btnNieuwBericht").attr("data-toggle", "modal");
+        }
+    }
+    refreshMap();
+}
+
+function patternSelectRow(element) {
+    $(element).parent().prev().find('.btn')[0].click();
+    $(element).parent().next().find('.btn')[0].click();
+}
+
+function patternSelect(index) {
+        var selector = '';
+        if (index == 0) {
+                selector = '.lijn .left > .btn[data-toggle="button"]';
+        } else if (index == 1) {
+                selector = '.lijn .right > .btn[data-toggle="button"]';
+        } else {
+                selector = '.lijn .btn[data-toggle="button"]';
+        }
+
+        $.each($(selector),function(index, value){ value.click(); });
+}
+
 function showLine(lineid) {
     if (lineid === undefined) {
         vectors.removeAllFeatures();
         vectors.addFeatures(stops_features);
         unselectStop();
     } else {
-    $('#lijnen').load('/assets/lines/'+lineid+'.html', function () {
+    $('#lijnen').load('/assets/lines/'+lineid+'.html', function (data) {
         /* TODO: deze code even abstract maken met showlines */
         for (var key in berichten) {
             n = berichten[key];
