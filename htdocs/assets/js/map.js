@@ -74,8 +74,6 @@ function getSelectedFeatures(){
 
 function refreshMap(){
     cluster_strategy.recluster();
-    vectors.refresh();    
-    vectors.redraw();
 }
 
 function getStopCluster(stop_id){
@@ -211,7 +209,12 @@ function showLine(target, lineid) {
                 });
             }
         }
-
+        $("#stopBasket").find("option").map(function () {
+           var button = $("#lijnen").find('#'+this.id)[0];
+           if (button){
+               $(button).addClass('btn-success active');
+           } 
+        });
         $('#tab-lijnen').tab('show');
         $('#map').css('width', ($(window).width() - ($("#lijnen").width() + 15)));
     });
@@ -219,6 +222,9 @@ function showLine(target, lineid) {
         line_stops_features = [];
         $.each(data, function(key, value) {
             var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(value.x, value.y), {active: false, key: key, name: value.name, lines: value.lines});
+            if ($("#stopBasket").find('#'+key).length > 0){
+                feature.renderIntent = "select";
+            }
             line_stops_features.push(feature);
         });
         vectors.removeAllFeatures();
