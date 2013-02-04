@@ -10,6 +10,7 @@
     <link href="assets/css/bootstrap.css" rel="stylesheet">
     <link href="assets/css/openebs2.css" rel="stylesheet">
     <link href="assets/css/datepicker.css" rel="stylesheet">
+    <link href="assets/css/bootstrap-timepicker.min.css" rel="stylesheet">
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -18,10 +19,10 @@
 
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="assets/ico/favicon.ico">
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/ico/apple-touch-icon-144-precomposed.png">
+    <!-- <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/ico/apple-touch-icon-144-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/ico/apple-touch-icon-72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png">-->
   </head>
 
   <body data-spy="scroll" data-target=".bs-docs-sidebar">
@@ -51,13 +52,13 @@
                 <a class="page" href="#scenario" data-toggle="tab">Scenario</a>
               </li>
               <li>
-                <a class="page" href="#" onClick="return signout();" id="username" title="Uitloggen">Uitloggen</a>
+                <a class="page" href="#" onclick="return signout();" id="username" title="Uitloggen">Uitloggen</a>
               </li>
             </ul>
 	    <form class="navbar-form pull-right">
-              <span><a class='toggleToMap btn btn-warning btn-normal disabled' href="#clearSelectie" id="btnLeegSelectie" onClick="clearSelection()">Leeg selectie</a></span>
-	      <span><a class='toggleToMap btn btn-success btn-normal disabled' href="#nieuwBerichtModal" id="btnNieuwBericht" onClick="return false;">Nieuw Bericht</a></span>
-	      <span><a class='toggleToMap btn btn-danger btn-normal disabled' href="#wijzigingModal" onClick="return false;">Wijzig Dienst</a></span>
+              <span><a class='toggleToMap btn btn-warning btn-normal disabled' href="#clearSelectie" id="btnLeegSelectie" onclick="clearSelection()">Leeg selectie</a></span>
+	      <span><a class='toggleToMap btn btn-success btn-normal disabled' href="#nieuwBerichtModal" id="btnNieuwBericht" onclick="return false;">Nieuw Bericht</a></span>
+	      <span><a class='toggleToMap btn btn-danger btn-normal disabled' href="#wijzigingModal" onclick="return false;">Wijzig Dienst</a></span>
             </form>
           </div>
         </div>
@@ -66,7 +67,7 @@
 
 <div id="map" class="map">&nbsp;</div>
     <div id="lijnenpanel" style="position: absolute; left: 0px; top: 40px; z-index: 1000;">
-      <div class="btn-group btn-group-vertical" style="float: left; margin: 2px; clear: both;"><a class='btn' style='width: 62px; z-index: 1000;' onClick='showLine();'>Alle haltes</a></div>
+      <div class="btn-group btn-group-vertical" style="float: left; margin: 2px; clear: both;"><a class='btn' style='width: 62px; z-index: 1000;' onclick='showLine();'>Alle haltes</a></div>
       <div class="btn-group btn-group-vertical" id="lijnen-BUS" style="float: left; margin: 2px; clear: both;"></div>
       <div class="btn-group btn-group-vertical" id="lijnen-TRAM" style="float: left; margin: 2px;"></div>
       <div class="btn-group btn-group-vertical" id="lijnen-BOAT" style="float: left; margin: 2px;"></div>
@@ -91,123 +92,57 @@
 </div>
 </div>
 
-<!--
-<table id="all" style="margin-top: 40px;">
-<tr>
-<td id="tab" class="tab-content">
-<div class="tab-pane" id="berichten">
-<table class="table table-hover">
-<tr><th>Begintijd</th><th>Eindtijd</th><th>Bericht</th><th>Aantal haltes</th><th></th></tr>
-</table>
-</div>
 
-<div class="tab-pane" id="scenario">
-<table class="table table-hover">
-<tr><th>Scenario</th><th>Aantal haltes</th><th>Gebruiker</th><th></th></tr>
-<tr><td>Alle Haltes</td><td>1004</td><td>Stefan</td><td><button class="btn btn-success btn-mini" onclick=""><i class="icon-play icon-white"></i></button> <button class="btn btn-danger btn-mini" onclick="" style="float: right;"><i class="icon-trash icon-white"></i></button></td></tr>
-</table>
-</td>
-</tr>
-</table>
-
-<section id="lijnen">
-
-</section>
-
--->
-
-<div id="nieuwBerichtModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-              <h3 id="myModalLabel">Nieuw Bericht</h3>
-            </div>
-       <div id="basket">
-             <select multiple="multiple" id="stopBasket"></select>
-       </div>
-            <div class="modal-body">
-  <form class="form-horizontal">
-      <input type="hidden" name="stops" value="" id="stops" />
-      <div class="control-group">
-        <label class="control-label" for="messagepriority">Prioriteit</label>
-        <div class="controls">
-          <div id="messagepriority" class="btn-group btn-fixed" data-toggle="buttons-radio"><button name="messagepriority" value="CALAMITY" type="button" class-toggle="btn-danger" class="btn btn-mini" title="Calamiteiten, acute en ongeplande verstoring van de dienstuitvoering met als gevolg acute en volledige uitval van het OV voor de betreffende halte.">Calamiteit</button><button name="messagepriority" value="PTPROCESS" type="button" class-toggle="btn-success" class="btn btn-mini active btn-success" title="OV-proces gerelateerde mededelingen, informatie over de dienstuitvoering.">OV</button><button name="messagepriority" value="COMMERCIAL" type="button" class-toggle="btn-success" class="btn btn-mini" title="Commerci&euml;le mededelingen, OV gerelateerde informatie die niet over de dienstuitvoering gaat.">Commercieel</button><button name="messagepriority" value="MISC" type="button" class-toggle="btn-success" class="btn btn-mini" title="Overig, mededingen die niet onder een van de andere categorie&euml;n valt.">Overig</button></div>
-          <p class="help-block">Invloed op het operationeel proces.</p>
-        </div>
-      </div>
-      
-      <div class="control-group">
-        <label class="control-label" for="messagetype">Soort</label>
-        <div class="controls">
-       <div id="messagetype" class="btn-group btn-fixed" data-toggle="buttons-radio"><button name="messagetype" value="GENERAL" type="button" class-toggle="btn-success" class="btn btn-mini active btn-success" title="Algemeen bericht dat getoond wordt op de onderste regel van det display. Overschrijft de eventuele aanwezige ritinformatie op de onderste regel.">Algemeen</button><button name="messagetype" value="ADDITIONAL" type="button" class-toggle="btn-success" class="btn btn-mini" title="Tekst die getoond wordt op de onderste regel van het display in geval dat de regel niet in gebruik is voor het tonen van ritinformatie.">Extra</button><button name="messagetype" value="OVERRULE" type="button" class-toggle="btn-danger" class="btn btn-mini" title="Tekst die op het gehele display getoond wordt. Vervangt eventueel andere getoonde informatie.">Overschrijf</button><button name="messagetype" value="BOTTOMLINE" type="button" class-toggle="btn-success" class="btn btn-mini" title="Tekst die op de onderste regels van het display wordt. De overgebleven display regels tonen ritinformatie.">Onderaan</button></div>
-          <p class="help-block">Locatie van het te tonen bericht.</p>
-        </div>
-      </div>
-
-      <div class="control-group">
-        <label class="control-label" for="messagecontent">Nieuwe vrije tekst</label>
-        <div class="controls">
-          <textarea type="text" class="input-xlarge limit" id="messagecontent" maxlength="255" row="1" cols="50" style="font-family: monospace; font-size: x-small;" data-provide="limit" data-countre="#counter" placeholder="Schrijf hier de nieuwe vrije tekst..."></textarea>
-      <em id="counter">255</em>
-        </div>
-      </div>
-
-      <div class="control-group">
-        <label class="control-label" for="messagestarttime">Begintijd</label>
-        <div class="controls">
-       <input id="messagestarttime" type="text" data-datepicker-format="dd-mm-yyyy hh:ii:ss" />
-        </div>
-      </div>
-
-      <div class="control-group">
-        <label class="control-label" for="messageendtime">Eindtijd</label>
-        <div class="controls">
-       <input id="messageendtime" type="text" data-datepicker-format="dd-mm-yyyy hh:ii:ss" />
-        </div>
-      </div>
-
-      <div id="auth_messagescenario" class="control-group" style="display: none">
-        <label class="control-label" for="messagescenario">Scenario</label>
-        <div class="controls">
-       <input id="messagescenario" type="text" class="input-xlarge" maxlength="255" />
-            <p class="help-block" style="margin-top: 0;">Naam van het scenario, om later te plannen.</p>
-        </div>
-      </div>
-  </form>
-
-            </div>
-<div id="nieuwBerichtModalAlert"></div>
-            <div class="modal-footer">
-              <button class="btn" data-dismiss="modal">Sluit</button>
-              <button class="btn btn-primary" id="nieuw-submit" onclick="kv15submit();">Publiceer</button>
-            </div>
-          </div>
-
-
-            </div>
-  <div id="nieuwPlanningModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="nieuwPlanninglLabel" aria-hidden="true">
+  <div id="nieuwBerichtModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
 
-      <h3 id="nieuwPlanningLabel">Nieuw Planning</h3>
+      <h3 id="myModalLabel">Nieuw Bericht</h3>
+    </div>
+
+    <div id="basket">
+      <select multiple="multiple" id="stopBasket"></select>
     </div>
 
     <div class="modal-body">
       <form class="form-horizontal">
-        <input type="hidden" name="stops" value="" id="stops">
+        <input type="hidden" name="stops" value="" id="stops" />
 
         <div class="control-group">
-          <label class="control-label" for="messagestarttime">Begindatum</label>
+          <label class="control-label" for="messagepriority">Prioriteit</label>
 
           <div class="controls">
-            <input id="messagestarttime" type="text" data-datepicker-format="dd-mm-yyyy">
+            <div id="messagepriority" class="btn-group btn-fixed" data-toggle="buttons-radio">
+              <button name="messagepriority" value="CALAMITY" type="button" class-toggle="btn-danger" class="btn btn-mini" title="Calamiteiten, acute en ongeplande verstoring van de dienstuitvoering met als gevolg acute en volledige uitval van het OV voor de betreffende halte.">Calamiteit</button>
+              <button name="messagepriority" value="PTPROCESS" type="button" class-toggle="btn-success" class="btn btn-mini active btn-success" title="OV-proces gerelateerde mededelingen, informatie over de dienstuitvoering.">OV</button>
+              <button name="messagepriority" value="COMMERCIAL" type="button" class-toggle="btn-success" class="btn btn-mini" title="Commerci&#235;le mededelingen, OV gerelateerde informatie die niet over de dienstuitvoering gaat.">Commercieel</button>
+              <button name="messagepriority" value="MISC" type="button" class-toggle="btn-success" class="btn btn-mini" title="Overig, mededingen die niet onder een van de andere categorie&#235;n valt.">Overig</button>
+            </div>
+
+            <p class="help-block">Invloed op het operationeel proces.</p>
           </div>
         </div>
 
         <div class="control-group">
-          <label class="control-label" for="messageendtime">Einddatum</label>
+          <label class="control-label" for="messagetype">Soort</label>
 
           <div class="controls">
-            <input id="messageendtime" type="text" data-datepicker-format="dd-mm-yyyy">
+            <div id="messagetype" class="btn-group btn-fixed" data-toggle="buttons-radio">
+              <button name="messagetype" value="GENERAL" type="button" class-toggle="btn-success" class="btn btn-mini active btn-success" title="Algemeen bericht dat getoond wordt op de onderste regel van det display. Overschrijft de eventuele aanwezige ritinformatie op de onderste regel.">Algemeen</button>
+              <button name="messagetype" value="ADDITIONAL" type="button" class-toggle="btn-success" class="btn btn-mini" title="Tekst die getoond wordt op de onderste regel van het display in geval dat de regel niet in gebruik is voor het tonen van ritinformatie.">Extra</button>
+              <button name="messagetype" value="OVERRULE" type="button" class-toggle="btn-danger" class="btn btn-mini" title="Tekst die op het gehele display getoond wordt. Vervangt eventueel andere getoonde informatie.">Overschrijf</button>
+              <button name="messagetype" value="BOTTOMLINE" type="button" class-toggle="btn-success" class="btn btn-mini" title="Tekst die op de onderste regels van het display wordt. De overgebleven display regels tonen ritinformatie.">Onderaan</button>
+            </div>
+
+            <p class="help-block">Locatie van het te tonen bericht.</p>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="messagecontent">Nieuwe vrije tekst</label>
+
+          <div class="controls">
+            <textarea type="text" class="input-xlarge limit" id="messagecontent" maxlength="255" row="1" cols="50" style="font-family: monospace; font-size: x-small;" data-provide="limit" data-countre="#counter" placeholder="Schrijf hier de nieuwe vrije tekst..."></textarea> <em id="counter">255</em>
           </div>
         </div>
 
@@ -215,7 +150,7 @@
           <label class="control-label" for="messagestarttime">Begintijd</label>
 
           <div class="controls">
-            <input id="messagestarttime" type="text" data-datepicker-format="hh:ii:ss">
+            <input id="messagestarttime" type="text" data-datepicker-format="dd-mm-yyyy hh:ii:ss">
           </div>
         </div>
 
@@ -223,26 +158,136 @@
           <label class="control-label" for="messageendtime">Eindtijd</label>
 
           <div class="controls">
-            <input id="messageendtime" type="text" data-datepicker-format="hh:ii:ss">
+            <input id="messageendtime" type="text" data-datepicker-format="dd-mm-yyyy hh:ii:ss">
           </div>
         </div>
 
-
-        <div class="control-group">
-          <label class="control-label" for="messagepriority">Prioriteit</label>
+        <div id="auth_messagescenario" class="control-group" style="display: none">
+          <label class="control-label" for="messagescenario">Scenario</label>
 
           <div class="controls">
-            <div id="messagepriority" class="btn-group btn-fixed" data-toggle="buttons-checkbox">
-              <button name="messageweekday" value="1" type="button" class-toggle="btn-success" class="btn btn-mini" title="Maandag">Maandag</button>
-              <button name="messageweekday" value="2" type="button" class-toggle="btn-success" class="btn btn-mini" title="Dinsdag">Dinsdag</button>
-              <button name="messageweekday" value="3" type="button" class-toggle="btn-success" class="btn btn-mini" title="Woensdag">Woensdag</button>
-              <button name="messageweekday" value="4" type="button" class-toggle="btn-success" class="btn btn-mini" title="Donderdag">Donderdag</button>
-              <button name="messageweekday" value="5" type="button" class-toggle="btn-success" class="btn btn-mini" title="Vrijdag">Vrijdag</button>
-              <button name="messageweekday" value="6" type="button" class-toggle="btn-success" class="btn btn-mini" title="Zaterdag">Zaterdag</button>
-              <button name="messageweekday" value="0" type="button" class-toggle="btn-success" class="btn btn-mini" title="Zondag">Zondag</button>
-            </div>
+            <input id="messagescenario" type="text" class="input-xlarge" maxlength="255">
 
-            <p class="help-block">Invloed op het operationeel proces.</p>
+            <p class="help-block" style="margin-top: 0;">Naam van het scenario, om later te plannen.</p>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div id="nieuwBerichtModalAlert"></div>
+
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Sluit</button> <button class="btn btn-primary" id="nieuw-submit" onclick="kv15submit();">Publiceer</button>
+    </div>
+  </div>
+
+  <div id="nieuwScenarioModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+
+      <h3 id="myModalLabel">Scenario</h3>
+    </div>
+
+    <div id="scenariobasket">
+      <select multiple="multiple" id="scenarioBasket"></select>
+    </div>
+
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <input type="hidden" name="scenariomessages" value="" id="scenariomessages">
+
+        <div class="control-group">
+          <label class="control-label" for="scenariocontent">Alternatieve vrije tekst</label>
+
+          <div class="controls">
+            <textarea type="text" class="input-xlarge limit" id="scenariocontent" maxlength="255" row="1" cols="50" style="font-family: monospace; font-size: x-small;" data-provide="limit" data-countre="#scenariocounter" placeholder="Overschrijf ALLE vrijeteksten met..."></textarea> <em id="scenariocounter">255</em>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="scenariostarttime">Begintijd</label>
+
+          <div class="controls">
+            <input id="scenariostarttime" type="text" data-datepicker-format="dd-mm-yyyy hh:ii:ss">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="scenarioendtime">Eindtijd</label>
+
+          <div class="controls">
+            <input id="scenarioendtime" type="text" data-datepicker-format="dd-mm-yyyy hh:ii:ss">
+          </div>
+        </div>
+
+        <input type="hidden" name="scenario" value="" id="scenarioname" />
+      </form>
+    </div>
+
+    <div id="nieuwScenarioModalAlert"></div>
+
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Sluit</button> <button class="btn btn-primary" id="nieuw-submit" onclick="kv15scenariosubmit();">Publiceer</button>
+    </div>
+  </div>
+
+<!--
+  <div id="nieuwPlanningModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="nieuwPlanninglLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+
+      <h3 id="nieuwPlanningLabel">Planning</h3>
+    </div>
+
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <input type="hidden" name="stops" value="" id="stops">
+
+        <div class="control-group">
+          <label class="control-label" for="planningstarttime">Begindatum</label>
+
+          <div class="controls">
+            <input id="planningstartdate" type="text" data-datepicker-format="dd-mm-yyyy">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="planningendtime">Einddatum</label>
+
+          <div class="controls">
+            <input id="planningenddate" type="text" data-datepicker-format="dd-mm-yyyy">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="planningstarttime">Begintijd</label>
+
+          <div class="controls">
+            <input id="planningstarttime" type="text">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="planningendtime">Eindtijd</label>
+
+          <div class="controls">
+            <input id="planningendtime" type="text">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="planningweekday">Weekdag</label>
+
+          <div class="controls">
+            <div id="planningweekday" class="btn-group btn-fixed" data-toggle="buttons-checkbox">
+              <button style="width: 3em;" name="planningweekday" value="1" type="button" class-toggle="btn-success" class="btn btn-mini" title="Maandag">Ma</button>
+              <button style="width: 3em;" name="planningweekday" value="2" type="button" class-toggle="btn-success" class="btn btn-mini" title="Dinsdag">Di</button>
+              <button style="width: 3em;" name="planningweekday" value="3" type="button" class-toggle="btn-success" class="btn btn-mini" title="Woensdag">Wo</button>
+              <button style="width: 3em;" name="planningweekday" value="4" type="button" class-toggle="btn-success" class="btn btn-mini" title="Donderdag">Do</button>
+              <button style="width: 3em;" name="planningweekday" value="5" type="button" class-toggle="btn-success" class="btn btn-mini" title="Vrijdag">Vr</button>
+              <button style="width: 3em;" name="planningweekday" value="6" type="button" class-toggle="btn-success" class="btn btn-mini" title="Zaterdag">Za</button>
+              <button style="width: 3em;" name="planningweekday" value="0" type="button" class-toggle="btn-success" class="btn btn-mini" title="Zondag">Zo</button>
+            </div>
           </div>
         </div>
       </form>
@@ -254,7 +299,7 @@
       <button class="btn" data-dismiss="modal">Sluit</button> <button class="btn btn-primary" id="nieuw-submit" onclick="kv15planningsubmit();">Plan</button>
     </div>
   </div>
-
+-->
 
     <!-- Le javascript
     ================================================== -->
@@ -268,6 +313,7 @@
     <script type="text/javascript" src="assets/js/jquery.qtip-1.0.0-rc3.min.js"></script>
     <script type="text/javascript" src="assets/js/bootstrap.js"></script>
     <script type="text/javascript" src="assets/js/bootstrap-limit.js"></script>
+    <script type="text/javascript" src="assets/js/bootstrap-timepicker.min.js"></script>
     <script type="text/javascript" src="assets/js/map.js"></script>
     <script type="text/javascript" src="assets/js/kv15.js"></script>
     <script>
@@ -278,7 +324,12 @@
         $.ajaxSetup({cache:false});
         initopenlayers();
         $(".limit").limit({ maxChars: 255, warnChars: 78, counter: "#counter" });
+        $(".limit").limit({ maxChars: 255, warnChars: 78, counter: "#scenariocounter" });
         updateBerichten();
+
+        $('#planningstarttime').timepicker({template: false, showSeconds: true, showMeridian: false, showInputs: true, minuteStep: 1});
+        $('#planningendtime').timepicker({template: false, showSeconds: true, showMeridian: false, showInputs: true, minuteStep: 1});
+
 
 $('.btn-group > .btn, .btn[data-toggle="button"]').click(function() {
 

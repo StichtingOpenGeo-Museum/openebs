@@ -127,12 +127,12 @@ function updateScenario() {
         });
 
         trs = $.map(data, function(n, i) {
-            var key = n['messagescenario'];
+            var key = "'"+n['messagescenario']+"'";
             var action = '';
             if (authorization['scenario_create'] === true) {
-                action  = '<button class="btn btn-danger btn-mini" onclick="kv15deletescenario('+key+')" style="float: right;"><i class="icon-trash icon-white"></i></button>';
+                action  = '<button class="btn btn-danger btn-mini disabled" onclick="kv15deletescenario('+key+')" style="float: right; margin-left: 2px;"><i class="icon-trash icon-white"></i></button>';
             }
-            action += ' <button class="btn btn-success btn-mini" onclick="kv15scenario('+key+')" style="float: right;"><i class="icon-play icon-white"></i></button>';
+            action += ' <button class="btn btn-success btn-mini disabled" onclick="kv15planning('+key+')" style="float: right; margin-right: 2px; margin-left: 2px;"><i class="icon-calendar icon-white"></i></button> <button class="btn btn-success btn-mini" onclick="kv15scenario('+key+')" style="float: right; margin-right: 2px; margin-left: 2px;"><i class="icon-play icon-white"></i></button>';
 
             return '<tr><td>'+([n['messagescenario'], '<a href="#" onclick="haltesBericht('+key+');">'+n['userstopcodes'].length+'</a>', action].join('</td><td>'))+'</td></tr>';
         });
@@ -141,6 +141,68 @@ function updateScenario() {
         $('#scenario tbody').replaceWith(mytable);
     });
 }
+
+function kv15deletescenario(scenario) {
+    
+}
+
+function kv15planning(scenario) {
+    // $('#nieuwPlanningModal').modal('show');
+}
+
+function kv15scenario(scenario) {
+    $('#scenarioname').attr('value', scenario);
+    $.ajax({type: "GET", url: "/KV15scenarios/"+scenario, dataType: "json"})
+	.done(function (data) {
+        $("#scenarioBasket").empty();
+        $.each(data['messages'], function (i, n) {
+            var key = [n['messagecodedate'], n['messagecodenumber']].join('_');
+            $("#scenarioBasket").append('<option id="'+key+'">'+n['messagecontent']+' ('+n['userstopcodes'].length+')</option>');
+        });
+        $('#nieuwScenarioModal').modal('show');
+	});
+
+}
+
+//Enable deletion from the basket with selected scenarios
+$( '#scenarioBasket' ).on( 'keydown', function( event ) {
+    if (event.keyCode != 46 || $('#scenarioBasket').children().length <= 1){
+        return;
+    }
+    var item = $(this).children("option").filter(":selected");
+    item.remove();
+});
+
+function kv15scenariosubmit() {
+    var post = {
+        "scenarioname": $('#scenarioname').val(),
+        "scenariostarttime": datetimetoxml($('#scenariostarttime').val()),
+        "scenarioendtime": datetimetoxml($('#scenarioendtime').val()),
+        "messages": []
+    }
+
+    if ($('#scenariocontent').val() != '') {
+        post["scenariocontent"] = $('#scenariocontent').val();
+    }
+
+    $.each($("#scenarioBasket").children(), function (i, n) {
+        v = n.id.split('_');
+        post['messages'].push({'messagecodedate': v[0], 'messagecodenumber': v[1]});
+    });
+
+    $.ajax({type: "POST", url: "/KV15scenarios", data: post, dataType: "html"})
+    .done(function () {
+        $("#nieuwScenarioModalAlert").removeClass('alert alert-error');
+        $("#nieuwScenarioModalAlert").html('');
+        updateBerichten();
+        $('#nieuwScenarioModal').modal('hide'); 
+    })
+    .fail(function (data) {
+        $("#nieuwScenarioModalAlert").replaceWith('<div id="nieuwScenarioModalAlert" class="alert alert-error"><b>Waarschuwing</b> Scenario publiceren is niet gelukt.<br />'+data.responseText+'</div>');
+    });
+    
+}
+
 
 window.setInterval(updateBerichten,30000);
 

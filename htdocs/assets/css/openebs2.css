@@ -31,15 +31,19 @@ html, body {
  td.right { float: left; }
  td.left { float: right; }
 
- #nieuwBerichtModal{
+ #nieuwBerichtModal,  #nieuwScenarioModal {
     width: 900px;
     margin: -275px 0 0 -450px;
  }
 
- #stopBasket { 
+ #stopBasket,#scenarioBasket { 
     position: absolute;
     right: 0;
     width: 300px;
-    height: 396px;
+    height: 300px;
     z-index : 3000;
+ }
+
+ #scenarioBasket { 
+    height: 200px;
  }

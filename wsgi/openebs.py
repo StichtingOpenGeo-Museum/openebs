@@ -157,6 +157,47 @@ def openebs(environ, start_response):
             reply = StopMessage().overview_scenario(dataownercode)
             start_response('200 OK', COMMON_HEADERS_JSON + [('Content-length', str(len(str(reply)))),])
             return reply
+         elif environ['REQUEST_METHOD'] == 'POST':
+            post_env = environ.copy()
+            post_env['QUERY_STRING'] = ''
+            post = cgi.FieldStorage(fp=environ['wsgi.input'], environ=post_env, keep_blank_values=False)
+            scenarioname = None
+            scenariostarttime = None
+            scenarioendtime = None
+
+            if 'scenarioname' not in post:
+                return badrequest(start_response, 'Kan geen scenario plannen zonder ScenarioName')
+
+            if 'scenariostarttime' in post:
+                try:
+                    scenariostarttime = datetime.strptime(post['scenariostarttime'].value, '%Y-%m-%dT%H:%M:%S')
+                    if scenariostarttime > (datetime.now() + timedelta(hours=72)):
+                        return badrequest(start_response, 'ScenarioStartTime kan niet 72 uur in de toekomst liggen')                    
+                except:
+                    return badrequest(start_response, 'ScenarioStartTime kan niet worden gevalideerd')
+            else:
+                return badrequest(start_response, 'Kan geen scenario plannen zonder ScenarioStartTime')
+            
+            if 'scenarioendtime' in post:
+                try:
+                    scenarioendtime = datetime.strptime(post['scenarioendtime'].value, '%Y-%m-%dT%H:%M:%S')
+                except:
+                    return badrequest(start_response, 'ScenarioEndTime kan niet worden gevalideerd')
+            else:
+                return badrequest(start_response, 'Kan geen scenario plannen zonder ScenarioEndTime')
+
+            if scenariostarttime >= scenarioendtime:
+                return badrequest(start_response, 'ScenarioStartTime later of gelijk aan ScenarioEndTime')
+
+            return badrequest(start_response, 'Je hebt alles goed ingevuld, maar dit stukje moeten we nog implementeren.')         
+
+    elif url.startswith('/KV15scenarios/'):
+         if environ['REQUEST_METHOD'] == 'GET':
+            scenario = url.split('/KV15scenarios/')[1]
+            reply = StopMessage().overview_scenario(dataownercode, scenario)
+            start_response('200 OK', COMMON_HEADERS_JSON + [('Content-length', str(len(str(reply)))),])
+            return reply
+
     elif url == '/KV15deletemessages':
          if environ['REQUEST_METHOD'] == 'POST':
             post_env = environ.copy()
