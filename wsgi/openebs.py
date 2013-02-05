@@ -4,6 +4,7 @@ import cgi
 import datetime
 import psycopg2
 import json
+import re
 from datetime import date
 from kv78turbo.render import renderLines, getLines as cacheLines
 from kv78turbo.journeypatternizer import getLines
@@ -115,7 +116,7 @@ def openebs(environ, start_response):
     except:
         return notfound(start_response)
     author = environ['REMOTE_USER']
-    auth_author = {'scenario_create': False}
+    auth_author = {'scenario_create': False, 'scenario_delete': False}
     if author in authorization:
         auth_author = authorization[author]
 
@@ -197,6 +198,23 @@ def openebs(environ, start_response):
             reply = StopMessage().overview_scenario(dataownercode, scenario)
             start_response('200 OK', COMMON_HEADERS_JSON + [('Content-length', str(len(str(reply)))),])
             return reply
+    
+    elif url == '/KV15deletescenarios':
+         if environ['REQUEST_METHOD'] == 'POST':
+            post_env = environ.copy()
+            post_env['QUERY_STRING'] = ''
+            post = cgi.FieldStorage(fp=environ['wsgi.input'], environ=post_env, keep_blank_values=False)
+
+            if 'scenario_delete' in auth_author and auth_author['scenario_delete']:
+                if 'scenarioname' not in post:
+                    return badrequest(start_response, 'Geen scenario opgestuurd')
+
+                StopMessage().delete_scenario(dataownercode, post['scenarioname'].value)
+                reply = 'OK'
+                start_response('200 OK', COMMON_HEADERS_HTML + [('Content-length', str(len(str(reply)))),])
+                return reply
+            else:
+                return badrequest(start_response, 'U heeft geen rechten om een scenario te verwijderen')
 
     elif url == '/KV15deletemessages':
          if environ['REQUEST_METHOD'] == 'POST':
@@ -230,6 +248,9 @@ def openebs(environ, start_response):
             else:
                 conn.rollback()
                 conn.close()
+                regex = re.compile("<tmi8:ResponseError>(.*)</tmi8:ResponseError>",re.MULTILINE|re.LOCALE|re.DOTALL)
+                r = regex.search(resp)
+                resp = r.groups()[0]
                 return badrequest(start_response,resp)
             reply = 'Bericht verwijderd'
             start_response('200 OK', COMMON_HEADERS_TEXT + [('Content-length', str(len(reply))),])
@@ -304,10 +325,10 @@ def openebs(environ, start_response):
             if 'messagescenario' in post:
                 if 'scenario_create' in auth_author and auth_author['scenario_create']:
                     if len(post['messagescenario'].value) > 0:
-		    	conn = psycopg2.connect(kv15_database_connect)
-			kv15.save(conn=conn, messagescenario=post['messagescenario'].value)
-			conn.commit()
-			conn.close()
+                        conn = psycopg2.connect(kv15_database_connect)
+                        kv15.save(conn=conn, messagescenario=post['messagescenario'].value)
+                        conn.commit()
+                        conn.close()
                     else:
                         return badrequest(start_response, 'MessageScenario kan niet worden gevalideerd')            
                 else:
@@ -323,6 +344,9 @@ def openebs(environ, start_response):
                 else:
                     conn.rollback()
                     conn.close()
+                    regex = re.compile("<tmi8:ResponseError>(.*)</tmi8:ResponseError>",re.MULTILINE|re.LOCALE|re.DOTALL)
+                    r = regex.search(resp)
+                    resp = r.groups()[0]
                     return badrequest(start_response,resp)
             reply = 'Bericht verstuurd'
             start_response('200 OK', COMMON_HEADERS_TEXT + [('Content-length', str(len(reply)))])
