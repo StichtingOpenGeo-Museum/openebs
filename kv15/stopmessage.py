@@ -205,7 +205,7 @@ class StopMessage():
         (select string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
         (select string_agg(lineplanningnumber, '|') as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
         messagepriority, messagetype, messagedurationtype, messagestarttime, messageendtime, messagecontent, reasontype, subreasontype, reasoncontent, effecttype, subeffecttype, effectcontent, measuretype, submeasuretype, measurecontent, advicetype, subadvicetype, advicecontent, messagetimestamp
-        from kv15_stopmessage where dataownercode = %s and messagecodedate = %s and messagecodenumber = %s LIMIT 1;""", (dataownercode, messagecodedate, messagecodenumber,));
+        from kv15_stopmessage where isdeleted = false and dataownercode = %s and messagecodedate = %s and messagecodenumber = %s LIMIT 1;""", (dataownercode, messagecodedate, messagecodenumber,));
 
         output = cur.fetchall()
         for row in output:
@@ -237,7 +237,7 @@ messagecontent, cast(reasontype as int), subreasontype, reasoncontent,
 cast(effecttype as int), subeffecttype, effectcontent, cast(measuretype as int),submeasuretype,
 measurecontent, cast(advicetype as int), subadvicetype, advicecontent, cast(messagetimestamp as text),(current_timestamp < messageendtime) as isactive
 FROM kv15_stopmessage
-WHERE dataownercode = %s AND messagescenario IS NULL AND (current_timestamp < messageendtime)
+WHERE isdeleted = FALSE AND dataownercode = %s AND messagescenario IS NULL AND (current_timestamp < messageendtime)
 UNION
 (SELECT 
 dataownercode,
@@ -255,7 +255,8 @@ messagecontent, cast(reasontype as int), subreasontype, reasoncontent,
 cast(effecttype as int), subeffecttype, effectcontent, cast(measuretype as int),submeasuretype,
 measurecontent, cast(advicetype as int), subadvicetype, advicecontent, cast(messagetimestamp as text),(current_timestamp < messageendtime) as isactive
 FROM kv15_stopmessage
-WHERE dataownercode = %s AND messagescenario IS NULL AND (current_timestamp > messageendtime) LIMIT 50)
+WHERE isdeleted = FALSE AND dataownercode = %s AND messagescenario IS NULL AND (current_timestamp > messageendtime)
+ ORDER BY messagetimestamp DESC LIMIT 50)
 ORDER by isactive DESC ,messagetimestamp DESC""", (dataownercode,dataownercode));
 
         output = cur.fetchall()
@@ -265,6 +266,18 @@ ORDER by isactive DESC ,messagetimestamp DESC""", (dataownercode,dataownercode))
                 row['lineplanningnumbers'] = row['lineplanningnumbers'].split('|')
         return json.dumps(output)
     
+    def delete_scenario(self, dataownercode, scenario, conn=None):
+        if conn is None:
+            conn = psycopg2.connect(kv15_database_connect)
+
+        cur = conn.cursor()
+        
+        if scenario is not None:
+            cur.execute("update kv15_stopmessage set isdeleted = true where dataownercode = %s and messagescenario = %s;", (dataownercode, scenario,));
+            conn.commit()
+            
+        conn.close()
+
     def overview_scenario(self, dataownercode, scenario=None, conn=None):
         if conn is None:
             conn = psycopg2.connect(kv15_database_connect)
@@ -277,7 +290,7 @@ ORDER by isactive DESC ,messagetimestamp DESC""", (dataownercode,dataownercode))
                         from
                         (select dataownercode, messagecodedate, messagecodenumber, messagescenario,
                         (select string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
-                        (select string_agg(lineplanningnumber, '|') as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber) from kv15_stopmessage where dataownercode = %s AND messagescenario IS NOT NULL) AS X GROUP BY dataownercode, messagescenario ORDER BY messagescenario;""", (dataownercode,));
+                        (select string_agg(lineplanningnumber, '|') as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber) from kv15_stopmessage where isdeleted = false and dataownercode = %s AND messagescenario IS NOT NULL) AS X GROUP BY dataownercode, messagescenario ORDER BY messagescenario;""", (dataownercode,));
         else:
             cur.execute("""
 SELECT 
@@ -296,7 +309,7 @@ messagecontent, cast(reasontype as int), subreasontype, reasoncontent,
 cast(effecttype as int), subeffecttype, effectcontent, cast(measuretype as int),submeasuretype,
 measurecontent, cast(advicetype as int), subadvicetype, advicecontent, cast(messagetimestamp as text),(current_timestamp < messageendtime) as isactive
 FROM kv15_stopmessage
-WHERE dataownercode = %s AND messagescenario = %s;""", (dataownercode, scenario))
+WHERE isdeleted = FALSE AND dataownercode = %s AND messagescenario = %s;""", (dataownercode, scenario))
 
         output = cur.fetchall()
         for row in output:
