@@ -1,1 +1,1 @@
-authorization = { 'skinkie@htm.net': {'scenario_create': True} }
+authorization = { 'skinkie@htm.net': {'scenario_create': True, 'scenario_delete': True} }

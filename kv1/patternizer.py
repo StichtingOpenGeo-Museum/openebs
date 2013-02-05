@@ -38,11 +38,11 @@ def stopline(heen,weer,namekey_heen,codekey_heen,namekey_weer=None,codekey_weer=
     if codekey_weer is None:
         codekey_weer = codekey_heen
     if heen is not None and weer is not None:
-        return '<tr><td class="left"><button type="button" data-toggle="button" class-toggle="btn-success" class="btn btn-primary btn-mini" id="%(userstopcode1)s">%(name1)s</button></td><td><button class="btn btn-success btn-mini" onclick="selecteerHaltes(this);"><i class="icon-resize-horizontal icon-white"></i></td><td class="right"><button type="button" data-toggle="button" class-toggle="btn-success" class="btn btn-primary btn-mini" id="%(userstopcode2)s">%(name2)s</button></td></tr>\n' % {'userstopcode1' : heen['dataownercode']+'_'+heen[codekey_heen], 'name1': heen[namekey_heen], 'userstopcode2' : weer['dataownercode']+'_'+weer[codekey_weer], 'name2' : weer[namekey_weer]}
+        return '<tr><td class="left"><button type="button" data-toggle="button" onClick="patternSelectStop(this)" class-toggle="btn-success" class="btn btn-primary btn-mini" id="%(userstopcode1)s">%(name1)s</button></td><td><button class="btn btn-success btn-mini" onclick="patternSelectRow(this);"><i class="icon-resize-horizontal icon-white"></i></td><td class="right"><button type="button" data-toggle="button" onClick="patternSelectStop(this)" class-toggle="btn-success" class="btn btn-primary btn-mini" id="%(userstopcode2)s">%(name2)s</button></td></tr>\n' % {'userstopcode1' : heen['dataownercode']+'_'+heen[codekey_heen], 'name1': heen[namekey_heen], 'userstopcode2' : weer['dataownercode']+'_'+weer[codekey_weer], 'name2' : weer[namekey_weer]}
     elif heen is not None and weer is None:
-        return '<tr><td class="left"><button type="button" data-toggle="button" class-toggle="btn-success" class="btn btn-primary btn-mini" id="%(userstopcode1)s">%(name1)s</button></td><td></td><td></td></tr>\n'%{'userstopcode1' : heen['dataownercode']+'_'+heen[codekey_heen], 'name1' : heen[namekey_heen]}
+        return '<tr><td class="left"><button type="button" data-toggle="button" class-toggle="btn-success" class="btn btn-primary btn-mini" onClick="patternSelectStop(this)" id="%(userstopcode1)s">%(name1)s</button></td><td></td><td></td></tr>\n'%{'userstopcode1' : heen['dataownercode']+'_'+heen[codekey_heen], 'name1' : heen[namekey_heen]}
     elif heen is None and weer is not None:
-        return '<tr><td></td><td></td><td class="right"><button type="button" data-toggle="button" class-toggle="btn-success" class="btn btn-primary btn-mini" id="%(userstopcode2)s">%(name2)s</button></td></tr>\n'%{'userstopcode2' : weer['dataownercode']+'_'+weer[codekey_weer], 'name2' : weer[namekey_weer]}
+        return '<tr><td></td><td></td><td class="right"><button type="button" data-toggle="button" class-toggle="btn-success" onClick="patternSelectStop(this)" class="btn btn-primary btn-mini" id="%(userstopcode2)s">%(name2)s</button></td></tr>\n'%{'userstopcode2' : weer['dataownercode']+'_'+weer[codekey_weer], 'name2' : weer[namekey_weer]}
 
 def stopkey(row,stopkey):
     return row['dataownercode'] + '|' + row[stopkey]
@@ -99,7 +99,7 @@ order by lineplanningnumber,direction,linkorder""")
         pattern[key][row['direction']].append(row)
     for key,item in pattern.items():
         f = open(key+'.html','w')
-        f.write('<table class="lijn"><tr><th class="left"><button class="btn btn-success btn-mini" onclick="selecteer(0);"><i class="icon-arrow-down icon-white"></i></th><th><button class="btn btn-success btn-mini" onclick="selecteer(2);"><i class="icon-resize-horizontal icon-white"></i></th><th class="right"><button class="btn btn-success btn-mini" onclick="selecteer(1);"><i class="icon-arrow-up icon-white"></i></th></tr>')
+        f.write('<table class="lijn"><tr><th class="left"><button class="btn btn-success btn-mini" onclick="patternSelect(0);"><i class="icon-arrow-down icon-white"></i></th><th><button class="btn btn-success btn-mini" onclick="patternSelect(2);"><i class="icon-resize-horizontal icon-white"></i></th><th class="right"><button class="btn btn-success btn-mini" onclick="patternSelect(1);"><i class="icon-arrow-up icon-white"></i></th></tr>')
         if 2 not in item:
             order(item[1])
             for stop in item[1]:
