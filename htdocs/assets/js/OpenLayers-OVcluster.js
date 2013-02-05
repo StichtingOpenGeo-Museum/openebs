@@ -73,6 +73,9 @@ OpenLayers.Strategy.OVCluster = OpenLayers.Class(OpenLayers.Strategy.Cluster, {
         );
         cluster.cluster = [feature];
         cluster.renderIntent = feature.renderIntent;
+        if (feature.attributes.messageactive == true){
+            cluster.attributes.messageactive = true;
+        }
         return cluster;
     },
 

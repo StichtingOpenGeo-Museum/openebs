@@ -25,6 +25,7 @@ $('#nieuwBerichtModal').on('show', function () {
         $("#stopBasket").find("#"+feature.attributes.key).remove();
         $("#stopBasket").append('<option id="'+feature.attributes.key+'">'+feature.attributes.name+' ('+feature.attributes.key.split("_")[1] +')</option>');
     }
+    updateBerichten();
 });
 
 //Enable deletion from the basket with selected stops
@@ -82,22 +83,33 @@ function haltesBericht(dataownercode, messagecodedate, messagecodenumber) {
 }
 
 function updateBerichten() {
+
     $.getJSON('/KV15messages', function(data) {
         berichten = {};
+        var features = getFeaturesWithRenderIntent('messageactive');
+        for (var i in features){
+            features[i].renderIntent = 'default';
+            features[i].attributes.name = features[i].data.name;
+        }
         $.each(data, function(key, n) {
             berichten[[n['dataownercode'], n['messagecodedate'], n['messagecodenumber']].join('_')] = n;
-
             if (n['isactive']) {
                 $.each(n['userstopcodes'], function(key2, m) {
                     var stop = $('#'+n['dataownercode']+'_'+m);
                     if (stop !== undefined && !stop.hasClass('btn-warning')) {
-                        stop.removeClass('btn-primary');
+                        stop.removeClass('btn-primary active');
                         stop.addClass('btn-warning');
+                    }
+                    feature = getStopFeature(n['dataownercode']+'_'+m);
+                    if (feature && feature.renderIntent != "messageactive"){
+                        feature.renderIntent = "messageactive";
+                        feature.attributes.messageactive = true;
+                        feature.attributes.name += '\n[' + n['messagecontent'] +']';
                     }
                 });
             }
         });
-
+        refreshMap();
         trs = $.map(data, function(n, i) {
             var key = '\''+[n['dataownercode'], n['messagecodedate'], n['messagecodenumber']].join('\', \'')+'\'';
             var trclass = '';
@@ -129,8 +141,8 @@ function updateScenario() {
         trs = $.map(data, function(n, i) {
             var key = "'"+n['messagescenario']+"'";
             var action = '';
-            if (authorization['scenario_create'] === true) {
-                action  = '<button class="btn btn-danger btn-mini disabled" onclick="kv15deletescenario('+key+')" style="float: right; margin-left: 2px;"><i class="icon-trash icon-white"></i></button>';
+            if (authorization['scenario_delete'] === true) {
+                action  = '<button class="btn btn-danger btn-mini" onclick="kv15deletescenario('+key+')" style="float: right; margin-left: 2px;"><i class="icon-trash icon-white"></i></button>';
             }
             action += ' <button class="btn btn-success btn-mini disabled" onclick="kv15planning('+key+')" style="float: right; margin-right: 2px; margin-left: 2px;"><i class="icon-calendar icon-white"></i></button> <button class="btn btn-success btn-mini" onclick="kv15scenario('+key+')" style="float: right; margin-right: 2px; margin-left: 2px;"><i class="icon-play icon-white"></i></button>';
 
@@ -142,8 +154,19 @@ function updateScenario() {
     });
 }
 
-function kv15deletescenario(scenario) {
-    
+function kv15deletescenario(scenarioname) {
+     var post = {
+        "scenarioname": scenarioname
+     }
+     $.ajax({type: "POST", url: "/KV15deletescenarios", data: post, dataType: "html"})
+     .done(function (data) {
+     	$("#scenarioAlert").removeClass('alert alert-error');
+		$("#scenarioAlert").html('');
+        updateScenario();
+     })
+     .fail(function (data) {
+		$("#scenarioAlert").replaceWith('<div id="berichtenAlert" class="alert alert-error"><b>Waarschuwing</b> '+data.responseText+'</div>');
+     });
 }
 
 function kv15planning(scenario) {
@@ -214,7 +237,7 @@ function kv15deletemessage(dataownercode, messagecodedate, messagecodenumber) {
 	}
 	$.ajax({type: "POST", url: "/KV15deletemessages", data: post, dataType: "html"})
 	.done(function () {
-    		$("#berichtenAlert").removeClass('alert alert-error');
+  		$("#berichtenAlert").removeClass('alert alert-error');
 		$("#berichtenAlert").html('');
 		updateBerichten(); 
 	})
@@ -255,7 +278,7 @@ function herplanBericht(dataownercode, messagecodedate, messagecodenumber) {
         }
 
         var bericht = berichten[id];
-        $('#messagecontent').text(bericht['messagecontent']);
+        $('#messagecontent').attr('value', bericht['messagecontent']);
         $('#messagecontent').keypress();
         $('#messagestarttime').attr('value', bericht['messagestarttime']);
         $('#messageendtime').attr('value', bericht['messageendtime']);

@@ -10,7 +10,7 @@ var vectors = new OpenLayers.Layer.Vector("Haltes",
  strategies: [cluster_strategy],
  styleMap: new OpenLayers.StyleMap({
     "default": new OpenLayers.Style(OpenLayers.Util.applyDefaults({
-        externalGraphic: 'assets/img/bus-12.png',
+        externalGraphic: 'assets/img/kleinedris-12.png',
         graphicOpacity: 1,
         graphicHeight: 12,
         graphicWidth: 12,
@@ -18,10 +18,15 @@ var vectors = new OpenLayers.Layer.Vector("Haltes",
         title: "${name}",
     }, OpenLayers.Feature.Vector.style["default"]), { context: { name: function(feature) { if(feature.cluster) { last = feature.cluster.length - 1; if(feature.cluster[0].attributes.name == feature.cluster[last].attributes.name) { feature.attributes.name = feature.cluster[0].attributes.name; } else { feature.attributes.name = ''; } } return feature.attributes.name; } } } ),
     "select": new OpenLayers.Style({
-        externalGraphic: 'assets/img/bus-24-selected.png',
+        externalGraphic: 'assets/img/kleinedris-24.png',
         graphicHeight: 24,
         graphicWidth: 24
-    })})}
+    }),
+    "messageactive": new OpenLayers.Style({
+            externalGraphic: 'assets/img/kleinedrisbericht-12.png',
+	            graphicHeight: 12,
+		    graphicWidth : 12})
+    })}
 );
   
   
@@ -77,21 +82,26 @@ function clearSelection(){
 }
 
 function getSelectedFeatures(){
+   return getFeaturesWithRenderIntent("select");
+}
+
+function getFeaturesWithRenderIntent(renderintent){
    selected = [];
    for (var i in vectors.features){
        feature = vectors.features[i];
        if (feature.cluster){
            for (var j in feature.cluster){
-               if (feature.cluster[j].renderIntent == "select"){
+               if (feature.cluster[j].renderIntent == renderintent){
                    selected.push(feature.cluster[j]);
                }
            }
-       }else if (feature.renderIntent == "select"){
+       }else if (feature.renderIntent == renderintent){
            selected.push(feature);
        }
    }
    return selected
 }
+
 
 function refreshMap(){
     cluster_strategy.recluster();
@@ -114,12 +124,17 @@ function getStopCluster(stop_id){
 }
 
 function selectStop(feature) {
+    if (feature.attributes.messageactive == true){
+        feature.renderIntent = 'messageactive';
+        refreshMap();
+        return;
+    }
     if (feature.cluster){
         for (var i in feature.cluster){
             clust = feature.cluster[i];
             clust.renderIntent = feature.renderIntent;
             $("#stopBasket").find("#"+clust.attributes.key).remove();
-            $("#stopBasket").append('<option id="'+clust.attributes.key+'">'+clust.attributes.name+' ('+clust.attributes.key.split("_")[1] +')</option>');
+            $("#stopBasket").append('<option id="'+clust.attributes.key+'">'+clust.data.name+' ('+clust.attributes.key.split("_")[1] +')</option>');
             var button = $("#lijnen").find('#'+clust.attributes.key)
             if (button){
                 button.addClass("btn-success active");
@@ -131,7 +146,7 @@ function selectStop(feature) {
         if (button){
            button.addClass("btn-success active");
         }
-        $("#stopBasket").append('<option id="'+feature.attributes.key+'">'+feature.attributes.name+' ('+feature.attributes.key.split("_")[1] +')</option>');
+        $("#stopBasket").append('<option id="'+feature.attributes.key+'">'+feature.data.name+' ('+feature.attributes.key.split("_")[1] +')</option>');
     }
     if ($("#btnNieuwBericht").hasClass('disabled')) {
         $("#btnNieuwBericht").removeClass('disabled');
@@ -305,7 +320,7 @@ function initopenlayers() {
     map.addLayers([brt, vectors]);
 
     selectCtrl = new OpenLayers.Control.SelectFeature(vectors, 
-        { onSelect: selectStop, onUnselect: unselectStop, multiple: true, toggle: true, box: false}
+        { onSelect: selectStop, onUnselect: unselectStop, multiple: true, toggle: true, box: false, clickout: false}
     );
 
     map.addControl(selectCtrl);
@@ -322,7 +337,7 @@ function initopenlayers() {
                 $.each(data, function(transporttype, value) {
                     $("#lijnen-"+transporttype).empty();
                     $.each(value, function(key, value) {
-                        $("#lijnen-"+transporttype).append("<a class='btn' style='width: 1em;' onClick='showLine(this, \""+value.id+"\");' title='"+value.name+"'>"+value.linenr+"</a>");
+                        $("#lijnen-"+transporttype).append("<a class='btn' style='width: 1em;' onClick='showLine(this, \""+value.id+"\");' title='"+value.name.replace('"', '&quot;').replace('<', '&gt;').replace('>', '&lt;').replace("'", "&#39;")+"'>"+value.linenr+"</a>");
                     });
                 });
             });
