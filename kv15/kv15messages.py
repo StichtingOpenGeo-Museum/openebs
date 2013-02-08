@@ -32,12 +32,12 @@ class KV15messages:
         if conn_created:
             conn.close()
 
-    def log(self, conn = None,author=None,message=None):
+    def log(self, conn = None,author=None,message=None,ipaddress=None):
         conn_created = False
         if conn is None:
             conn = psycopg2.connect(kv15_database_connect)
             conn_created = True
         for stopmessage in self.stopmessages:
-            stopmessage.log(conn,author=author,message=message)
+            stopmessage.log(conn,author=author,message=message,ipaddress=ipaddress)
         if conn_created:
             conn.close()

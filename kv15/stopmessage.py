@@ -344,13 +344,13 @@ WHERE isdeleted = FALSE AND dataownercode = %s AND messagescenario = %s;""", (da
             conn.commit()
             conn.close()
 
-    def log(self,conn=None,author=None,message=None):
+    def log(self,conn=None,author=None,message=None,ipaddress=None):
         conn_created = False
         if conn is None:
             conn = psycopg2.connect(kv15_database_connect)
             conn_created = True
         cur = conn.cursor()
-        cur.execute("""INSERT INTO kv15_log (timestamp,dataownercode,messagecodedate,messagecodenumber,author,message) VALUES (%s,%s,%s,%s,%s,%s)""",[datetime.now(),self.dataownercode,self.messagecodedate,self.messagecodenumber,author,message])
+        cur.execute("""INSERT INTO kv15_log (timestamp,dataownercode,messagecodedate,messagecodenumber,author,message,ipaddress) VALUES (%s,%s,%s,%s,%s,%s,%s)""",[datetime.now(),self.dataownercode,self.messagecodedate,self.messagecodenumber,author,message,ipaddress])
         if conn_created:
             conn.commit()
             conn.close()

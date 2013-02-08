@@ -99,7 +99,7 @@ stopinline_cache = {}
 def openebs(environ, start_response):
     url = environ['PATH_INFO']
     dataownercode = None
-
+    ip_addr = environ['REMOTE_ADDR']
 #    if url == '/uitloggen':
 #    	return signout(start_response)
 
@@ -240,7 +240,7 @@ def openebs(environ, start_response):
 
             conn = psycopg2.connect(kv15_database_connect)
             kv15.save(conn=conn)
-            kv15.log(conn=conn,author=author,message='DELETE')
+            kv15.log(conn=conn,author=author,message='DELETE',ipaddress=ip_addr)
             respcode, resp = kv15.push(remote, remote_path)
             if not send or '>OK</' in resp:
                 conn.commit()
@@ -336,7 +336,7 @@ def openebs(environ, start_response):
             else:     
                 conn = psycopg2.connect(kv15_database_connect)
                 kv15.save(conn=conn)
-                kv15.log(conn=conn,author=author,message='PUBLISH')
+                kv15.log(conn=conn,author=author,message='PUBLISH',ipaddress=ip_addr)
                 respcode,resp = kv15.push(remote, remote_path)
                 if not send or '>OK</' in resp:
                     conn.commit()
