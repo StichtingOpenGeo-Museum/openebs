@@ -180,6 +180,7 @@ function addStop(key, value) {
     stops_features.push(feature);
 }
 
+/*
 function patternSelectStop(element){
     element = $(element);
     var id = element.attr('id');
@@ -207,10 +208,47 @@ function patternSelectStop(element){
     }
     refreshMap();
 }
+*/
+
+function patternSelectStop(element) {
+    patternSelectStopEach(element);
+    patternSelectStopFinal();
+}
+
+function patternSelectStopEach(element) {
+    element = $(element);
+    var id = element.attr('id');
+    var feature = getStopFeature(id);
+    if (element.hasClass('btn-success')){
+        feature.renderIntent = 'default';
+        element.removeClass('btn-success');
+        element.addClass('btn-primary');
+        $("#stopBasket").find("#"+id).remove();
+    } else {
+        $("#stopBasket").find("#"+id).remove();
+        $("#stopBasket").append('<option id="'+id+'">'+element.text()+' ('+id.split("_")[1] +')</option>');
+        feature.renderIntent = 'select';
+        element.addClass('btn-success');
+    }
+}
+
+function patternSelectStopFinal() {
+    if ($("#stopBasket").children().length == 0 && !$("#btnNieuwBericht").hasClass('disabled')) {
+        $("#btnNieuwBericht").addClass('disabled');
+        $("#btnLeegSelectie").addClass('disabled');
+        $("#btnNieuwBericht").removeAttr("data-toggle");
+    } else if ($("#btnNieuwBericht").hasClass('disabled')) {
+        $("#btnNieuwBericht").removeClass('disabled');
+        $("#btnLeegSelectie").removeClass('disabled');
+        $("#btnNieuwBericht").attr("data-toggle", "modal");
+    }
+    refreshMap();
+}
 
 function patternSelectRow(element) {
-    $(element).parent().prev().find('.btn')[0].click();
-    $(element).parent().next().find('.btn')[0].click();
+    patternSelectStopEach($(element).parent().prev().find('.btn')[0]);
+    patternSelectStopEach($(element).parent().next().find('.btn')[0]);
+    patternSelectStopFinal();
 }
 
 function patternSelect(index) {
@@ -223,7 +261,8 @@ function patternSelect(index) {
                 selector = '.lijn .btn[data-toggle="button"]';
         }
 
-        $.each($(selector),function(index, value){ value.click(); });
+        $.each($(selector), function (i, v) { patternSelectStopEach(v) });
+        patternSelectStopFinal();
 }
 
 function showLine(target, lineid) {
