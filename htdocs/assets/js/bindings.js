@@ -102,6 +102,27 @@ $( '#btnWijzigDienst' ).on( 'click', function () {
     return false;
 });
 
+// When button All Stops is clicked
+$( '#btnAlleHaltes' ).on( 'click', function() {
+    $("#lijnenpanel a").removeClass("btn-success active");
+    $('#tab-openebs').tab('show');
+
+    vectors.removeAllFeatures();
+    for (var key in stops_features){
+        var feature = stops_features[key];      
+    }
+    vectors.addFeatures(stops_features);
+    unselectStop();
+    var basket = $("#stopBasket").find('#'+key);
+    $("#stopBasket").find("option").map(function () {
+        var feature = getStopFeature(this.id);
+        if (feature && feature.renderIntent == "default"){
+            feature.renderIntent = "select";
+        }
+    });
+    refreshMap();
+});
+
 // When the modal view is showed, the basket is updated
 $('#nieuwBerichtModal').on('show', function () {
     var selectedFeatures = getSelectedFeatures();
@@ -209,5 +230,7 @@ $( '#scenarioSubmit' ).on( 'click', function () {
     });
 });
 
-
-
+// TODO
+$( '#planningSubmit' ).on( 'click', function () {
+    return false;
+});

@@ -205,23 +205,9 @@ function patternSelect(index) {
 }
 
 function showLine(target, lineid) {
-    if (lineid === undefined) {
-        vectors.removeAllFeatures();
-        for (var key in stops_features){
-            var feature = stops_features[key];      
-        }
-        vectors.addFeatures(stops_features);
-        unselectStop();
-        var basket = $("#stopBasket").find('#'+key);
-        $("#stopBasket").find("option").map(function () {
-           var feature = getStopFeature(this.id);
-           if (feature && feature.renderIntent == "default"){
-               feature.renderIntent = "select";
-           }
-        });
-        refreshMap();
-        $('#tab-openebs').tab('show');
-    } else {
+    $("#lijnenpanel a").removeClass("btn-success active");
+    $(target).addClass("btn-success active");
+
     $('#lijnen').load('/assets/lines/'+lineid+'.html', function (data) {
         /* TODO: deze code even abstract maken met showlines */
         for (var key in berichten) {
@@ -239,14 +225,15 @@ function showLine(target, lineid) {
             }
         }
         $("#stopBasket").find("option").map(function () {
-           var button = $("#lijnen").find('#'+this.id)[0];
-           if (button){
-               $(button).addClass('btn-success active');
-           } 
+        var button = $("#lijnen").find('#'+this.id)[0];
+        if (button){
+            $(button).addClass('btn-success active');
+        } 
         });
         $('#tab-lijnen').tab('show');
         $('#map').css('width', ($(window).width() - ($("#lijnen").width() + 15)));
     });
+
     $.getJSON('/stops/line/'+lineid.split('_')[1], function(data) {
         line_stops_features = [];
         $.each(data, function(key, value) {
@@ -259,14 +246,8 @@ function showLine(target, lineid) {
         vectors.removeAllFeatures();
         vectors.addFeatures(line_stops_features);
         unselectStop();
-/*        map.zoomToExtent(vectors.getDataExtent());*/
-    } );
-    }
-
-    $("#lijnenpanel a").removeClass("btn-success active");
-    if (target !== undefined) {
-        $(target).addClass("btn-success active");
-    }
+/*      map.zoomToExtent(vectors.getDataExtent());*/
+    });
 }
 
 // initialise the 'map' object

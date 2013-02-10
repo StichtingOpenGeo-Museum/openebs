@@ -63,7 +63,7 @@
     <div id="map" class="map"></div>
     <div id="lijnenpanel" style="position: absolute; left: 0px; top: 40px; z-index: 1000;">
       <div class="btn-group btn-group-vertical" style="float: left; margin: 2px; clear: both;">
-        <a class='btn' style='width: 62px; z-index: 1000;' onclick='showLine();'>Alle haltes</a>
+        <a class="btn" style="width: 62px; z-index: 1000;" id="btnAlleHaltes">Alle haltes</a>
       </div>
       <div class="btn-group btn-group-vertical" id="lijnen-BUS" style="float: left; margin: 2px; clear: both;"></div>
       <div class="btn-group btn-group-vertical" id="lijnen-TRAM" style="float: left; margin: 2px;"></div>
@@ -255,7 +255,7 @@
       <div id="nieuwPlanningModalAlert"></div>
       <div class="modal-footer">
         <button class="btn" data-dismiss="modal">Sluit</button>
-        <button class="btn btn-primary" id="nieuw-submit" onclick="kv15planningsubmit();">Plan</button>
+        <button class="btn btn-primary" id="planningSubmit">Plan</button>
       </div>
     </div>
     <!-- Le javascript
