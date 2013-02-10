@@ -30,16 +30,6 @@ var vectors = new OpenLayers.Layer.Vector("Haltes",
 );
   
   
-/*function(key, value) {
-      markers[value.id] = L.marker([value.lat, value.lon], {icon: busIcon, id: value.id, active: false, title: value.name + ' ('+value.id+')'}).addTo(map).on("click", onClick);
-          if (value.lineplanningnumber !== null) {
-                  markers[value.id].setIcon(lineIcon);
-                          markers[value.id]._icon.style['-webkit-filter'] = 'hue-rotate('+value.lineplanningnumber*35+'deg)';
-                              }
-                                });
-                                });
-*/
-
 var stops = {};
 var stops_features = [];
 var line_stops_features = [];
