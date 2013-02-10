@@ -42,18 +42,18 @@
                 <a class="page" href="#scenario" data-toggle="tab">Scenario</a>
               </li>
               <li>
-                <a class="page" href="#" onclick="return signout();" id="username" title="Uitloggen">Uitloggen</a>
+                <a class="page" href="#" id="username" title="Uitloggen">Uitloggen</a>
               </li>
             </ul>
             <form class="navbar-form pull-right">
               <span>
-                <a class='toggleToMap btn btn-warning btn-normal disabled' href="#clearSelectie" id="btnLeegSelectie" onclick="clearSelection()">Leeg selectie</a>
+                <a class='toggleToMap btn btn-warning btn-normal disabled' href="#clearSelectie" id="btnLeegSelectie">Leeg selectie</a>
               </span>
               <span>
-                <a class='toggleToMap btn btn-success btn-normal disabled' href="#nieuwBerichtModal" id="btnNieuwBericht" onclick="return false;">Nieuw Bericht</a>
+                <a class='toggleToMap btn btn-success btn-normal disabled' href="#nieuwBerichtModal" id="btnNieuwBericht">Nieuw Bericht</a>
               </span>
               <span>
-                <a class='toggleToMap btn btn-danger btn-normal disabled' href="#wijzigingModal" onclick="return false;">Wijzig Dienst</a>
+                <a class='toggleToMap btn btn-danger btn-normal disabled' href="#wijzigingModal" id="btnWijzigDienst">Wijzig Dienst</a>
               </span>
             </form>
           </div>
@@ -162,7 +162,7 @@
       <div id="nieuwBerichtModalAlert"></div>
       <div class="modal-footer">
         <button class="btn" data-dismiss="modal">Sluit</button>
-        <button class="btn btn-primary" id="nieuw-submit" onclick="kv15submit();">Publiceer</button>
+        <button class="btn btn-primary" id="messageSubmit">Publiceer</button>
       </div>
     </div>
     <div id="nieuwScenarioModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -201,7 +201,7 @@
       <div id="nieuwScenarioModalAlert"></div>
       <div class="modal-footer">
         <button class="btn" data-dismiss="modal">Sluit</button>
-        <button class="btn btn-primary" id="nieuw-submit" onclick="kv15scenariosubmit();">Publiceer</button>
+        <button class="btn btn-primary" id="scenarioSubmit">Publiceer</button>
       </div>
     </div>
     <div id="nieuwPlanningModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="nieuwPlanninglLabel" aria-hidden="true">
@@ -271,8 +271,9 @@
     <script type="text/javascript" src="assets/js/bootstrap.js"></script>
     <script type="text/javascript" src="assets/js/bootstrap-limit.js"></script>
     <script type="text/javascript" src="assets/js/bootstrap-timepicker.min.js"></script>
+    <script type="text/javascript" src="assets/js/globals.js"></script>
     <script type="text/javascript" src="assets/js/map.js"></script>
     <script type="text/javascript" src="assets/js/kv15.js"></script>
-    <script type="text/javascript" src="assets/js/openebs.js"></script>
+    <script type="text/javascript" src="assets/js/bindings.js"></script>
   </body>
 </html>

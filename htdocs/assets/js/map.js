@@ -50,27 +50,6 @@ function getStopFeature(stop_id){
    return null;
 }
 
-function clearSelection(){
-   for (var i in vectors.features){
-       feature = vectors.features[i];
-       if (feature.cluster){
-           for (var j in feature.cluster){
-               if (feature.cluster[j].renderIntent == "select"){
-                   feature.cluster[j].renderIntent = "default";
-               }
-           }
-       }else if (feature.renderIntent == "select"){
-           feature.renderIntent = "default";
-       }
-   }
-   $(stopBasket).empty();
-   $("#lijnen").find(".active").removeClass("btn-success active");
-   refreshMap();
-   $("#btnNieuwBericht").addClass('disabled');
-   $("#btnLeegSelectie").addClass('disabled');
-   $("#btnNieuwBericht").attr("data-toggle", "modal");
-}
-
 function getSelectedFeatures(){
    return getFeaturesWithRenderIntent("select");
 }

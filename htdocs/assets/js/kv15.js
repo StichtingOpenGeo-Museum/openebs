@@ -18,38 +18,11 @@ function userStopCodesInBasket(){
    return stops;
 };
 
-$('#nieuwBerichtModal').on('show', function () {
-    var selectedFeatures = getSelectedFeatures();
-    for (var i in selectedFeatures){
-        var feature = selectedFeatures[i];
-        $("#stopBasket").find("#"+feature.attributes.key).remove();
-        $("#stopBasket").append('<option id="'+feature.attributes.key+'">'+feature.attributes.name+' ('+feature.attributes.key.split("_")[1] +')</option>');
-    }
-    updateBerichten();
-});
-
-//Enable deletion from the basket with selected stops
-$( '#stopBasket' ).on( 'keydown', function( event ) {
-    if (event.keyCode != 46 || $('#stopBasket').children().length <= 1){
-        return;
-    }
-    var item = $(this).children("option").filter(":selected");
-    item.remove();
-    var feature = getStopFeature(item.attr('id'));
-    $("#lijnen").find('#'+item.attr('id')).removeClass("btn-success active");
-    if (feature && feature.renderIntent == "select"){
-        feature.renderIntent = "default";
-        refreshMap();
-    }
-});
-
 function datetimetoxml(datetime) {
     var arr = datetime.split(' ');
     date_parts = arr[0].split('-');
     return [date_parts[2], date_parts[1], date_parts[0]].join('-') + 'T' + arr[1];
 }
-
-var berichten = null;
 
 function haltesBericht(dataownercode, messagecodedate, messagecodenumber) {
     var id = [dataownercode, messagecodedate, messagecodenumber].join('_');
@@ -129,8 +102,6 @@ function updateBerichten() {
     });
 }
 
-var scenario = null;
-
 function updateScenario() {
     $.getJSON('/KV15scenarios', function(data) {
         scenario = {};
@@ -187,48 +158,6 @@ function kv15scenario(scenario) {
 
 }
 
-//Enable deletion from the basket with selected scenarios
-$( '#scenarioBasket' ).on( 'keydown', function( event ) {
-    if (event.keyCode != 46 || $('#scenarioBasket').children().length <= 1){
-        return;
-    }
-    var item = $(this).children("option").filter(":selected");
-    item.remove();
-});
-
-function kv15scenariosubmit() {
-    var post = {
-        "scenarioname": $('#scenarioname').val(),
-        "scenariostarttime": datetimetoxml($('#scenariostarttime').val()),
-        "scenarioendtime": datetimetoxml($('#scenarioendtime').val()),
-        "messages": []
-    }
-
-    if ($('#scenariocontent').val() != '') {
-        post["scenariocontent"] = $('#scenariocontent').val();
-    }
-
-    $.each($("#scenarioBasket").children(), function (i, n) {
-        v = n.id.split('_');
-        post['messages'].push({'messagecodedate': v[0], 'messagecodenumber': v[1]});
-    });
-
-    $.ajax({type: "POST", url: "/KV15scenarios", data: post, dataType: "html"})
-    .done(function () {
-        $("#nieuwScenarioModalAlert").removeClass('alert alert-error');
-        $("#nieuwScenarioModalAlert").html('');
-        updateBerichten();
-        $('#nieuwScenarioModal').modal('hide'); 
-    })
-    .fail(function (data) {
-        $("#nieuwScenarioModalAlert").replaceWith('<div id="nieuwScenarioModalAlert" class="alert alert-error"><b>Waarschuwing</b> Scenario publiceren is niet gelukt.<br />'+data.responseText+'</div>');
-    });
-    
-}
-
-
-window.setInterval(updateBerichten,30000);
-
 function kv15deletemessage(dataownercode, messagecodedate, messagecodenumber) {
 	var post = {
 		"dataownercode": dataownercode,
@@ -244,29 +173,6 @@ function kv15deletemessage(dataownercode, messagecodedate, messagecodenumber) {
 	.fail(function (data) {
 		$("#berichtenAlert").replaceWith('<div id="berichtenAlert" class="alert alert-error"><b>Waarschuwing</b> Verwijderen is niet gelukt.<br />'+data.responseText+'</div>');
 	});
-}
-
-function kv15submit() {
-    $("#nieuwBerichtModalAlert").removeClass('alert alert-error');
-    $("#nieuwBerichtModalAlert").html('');
-    var post = {
-        "userstopcodes": userStopCodesInBasket(),
-        "messagepriority": $('button[name="messagepriority"].active').val(),
-        "messagetype": $('button[name="messagetype"].active').val(),
-        "messagecontent": $('#messagecontent').val()
-    }
-    var messagescenario = $('#messagescenario').val();
-    if (messagescenario != '') {
-        post['messagescenario'] = messagescenario;
-    } else {
-        post['messagestarttime'] = datetimetoxml($('#messagestarttime').val());
-        post['messageendtime'] = datetimetoxml($('#messageendtime').val());
-    }
-    $.ajax({type: "POST", url: "/KV15messages", data: post, dataType: "html"})
-    .done(function () { $('#nieuwBerichtModal').modal('hide'); updateBerichten();})
-    .fail(function (data) {
-        $("#nieuwBerichtModalAlert").replaceWith('<div id="nieuwBerichtModalAlert" class="alert alert-error"><b>Waarschuwing</b> Publiceren is niet gelukt.<br />'+data.responseText+'</div>');
-    });
 }
 
 function herplanBericht(dataownercode, messagecodedate, messagecodenumber) {
@@ -289,5 +195,3 @@ function herplanBericht(dataownercode, messagecodedate, messagecodenumber) {
         $('#nieuwBerichtModal').modal('show');
     }
 }
-
-
