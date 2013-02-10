@@ -241,7 +241,12 @@ def openebs(environ, start_response):
             conn = psycopg2.connect(kv15_database_connect)
             kv15.save(conn=conn)
             kv15.log(conn=conn,author=author,message='DELETE',ipaddress=ip_addr)
-            respcode, resp = kv15.push(remote, remote_path)
+            try:
+                respcode, resp = kv15.push(remote, remote_path)
+            except:
+                conn.rollback()
+                conn.close()
+                return badrequest(start_response,'Connectie met GOVI mislukt')
             if not send or '>OK</' in resp:
                 conn.commit()
                 conn.close()
