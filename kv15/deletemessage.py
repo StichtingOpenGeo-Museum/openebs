@@ -51,7 +51,7 @@ class DeleteMessage():
                 conn = psycopg2.connect(kv15_database_connect)
                 conn_created = True
             cur = conn.cursor()
-            cur.execute("""INSERT INTO kv15_log (timestamp,dataownercode,messagecodedate,messagecodenumber,author,message,ipaddress) VALUES (%s,%s,%s,%s,%s,%s,%s)""",[datetime.now(),self.dataownercode,self.messagecodedate,self.messagecodenumber,author,message,ip_addr])
+            cur.execute("""INSERT INTO kv15_log (timestamp,dataownercode,messagecodedate,messagecodenumber,author,message,ipaddress) VALUES (%s,%s,%s,%s,%s,%s,%s)""",[datetime.now(),self.dataownercode,self.messagecodedate,self.messagecodenumber,author,message,ipaddress])
             if conn_created:
                 conn.commit()
                 conn.close()
