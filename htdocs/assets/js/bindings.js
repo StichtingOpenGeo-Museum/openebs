@@ -167,7 +167,9 @@ $( '#messageSubmit' ).on( 'click', function () {
     .done(function () {
         $("#nieuwBerichtModalAlert").removeClass('alert alert-error');
         $("#nieuwBerichtModalAlert").html('');
-        $('#nieuwBerichtModal').modal('hide'); updateBerichten();
+        $('#nieuwBerichtModal').modal('hide'); 
+        updateBerichten();
+        $('#btnLeegSelectie').click();
     })
     .fail(function (data) {
         $("#nieuwBerichtModalAlert").replaceWith('<div id="nieuwBerichtModalAlert" class="alert alert-error"><b>Waarschuwing</b> Publiceren is niet gelukt.<br />'+data.responseText+'</div>');
