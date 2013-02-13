@@ -48,8 +48,10 @@ $(document).ready(function() {
 $('a[data-toggle="tab"]').on('show', function (e) {
     if ($(e.target).attr('href') == '#map') {
         $('#map').css('width', '100%');
+        $('#tabs').css('display', 'none');
     } else if ($(e.target).attr('href') == '#lijnen') {
         $('#map').css('width', ($(window).width() - $("#lijnen").width() + 15));
+        $('#tabs').css('display', 'inline');
     } else {
         if ($(e.target).attr('href') == '#berichten') {
             updateBerichten();
@@ -58,6 +60,7 @@ $('a[data-toggle="tab"]').on('show', function (e) {
         }
 
         $('#map').css('width', '50%');
+        $('#tabs').css('display', 'inline');
     }
 });
 
@@ -178,7 +181,7 @@ $( '#messageSubmit' ).on( 'click', function () {
 
 // Enable deletion from the basket with selected stops by using delete or backspace
 $( '#stopBasket' ).on( 'keydown', function( event ) {
-    if (event.keyCode != 46 || event.keyCode != 8 || $('#stopBasket').children().length <= 1){
+    if ((event.keyCode != 46 && event.keyCode != 8) || $('#stopBasket').children().length <= 1){
         return;
     }
 
