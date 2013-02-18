@@ -94,6 +94,7 @@ function updateBerichten() {
                 trclass = '';
                 action  = '<button class="btn btn-success btn-mini" onclick="herplanBericht('+key+');" style="float: right;"><i class="icon-refresh icon-white"></i></button>';
             }
+            // console.log(n);
             return '<tr class="'+trclass+'"><td>'+([n['messagestarttime'].replace(' ', '<br/>'), n['messageendtime'].replace(' ','<br/>'), '<a href="#" onclick="haltesBericht('+key+');">'+n['userstopcodes'].length+'</a>', n['messagecontent'], action].join('</td><td>'))+'</td></tr>';
         });
 
@@ -178,6 +179,7 @@ function kv15deletemessage(dataownercode, messagecodedate, messagecodenumber) {
 function herplanBericht(dataownercode, messagecodedate, messagecodenumber) {
     var id = [dataownercode, messagecodedate, messagecodenumber].join('_');
     if (id in berichten) {
+        $( '#btnLeegSelectie' ).click()
         haltesBericht(dataownercode, messagecodedate, messagecodenumber);
         for (var i = 0; i < vectors.features.length; i++) {
             selectCtrl.select(vectors.features[i]);
