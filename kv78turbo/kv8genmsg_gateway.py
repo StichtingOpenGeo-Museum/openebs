@@ -36,6 +36,8 @@ def fetchuserstopcode(dataownercode,timingpointcode):
     cur.execute("SELECT dataownercode,userstopcode FROM usertimingpoint WHERE dataownercode = %s and timingpointcode = %s", 
 [dataownercode,timingpointcode])
     row = cur.fetchone()
+    if row is None:
+        return (dataownercode,timingpointcode)
     cur.close()
     conn.close()
     return (row[0],row[1])

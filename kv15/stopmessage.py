@@ -232,7 +232,7 @@ cast(messagecodenumber as int),
 	WHERE dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate 
 		and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
 messagepriority, messagetype, messagedurationtype, 
-to_char(messagestarttime, 'DD-MM-IYYY HH24:MI:SS') as messagestarttime,to_char(messageendtime, 'DD-MM-IYYY HH24:MI:SS') as messageendtime,
+to_char(messagestarttime, 'DD-MM-YYYY HH24:MI:SS') as messagestarttime,to_char(messageendtime, 'DD-MM-YYYY HH24:MI:SS') as messageendtime,
 messagecontent, cast(reasontype as int), subreasontype, reasoncontent,
 cast(effecttype as int), subeffecttype, effectcontent, cast(measuretype as int),submeasuretype,
 measurecontent, cast(advicetype as int), subadvicetype, advicecontent, cast(messagetimestamp as text),(current_timestamp < messageendtime) as isactive

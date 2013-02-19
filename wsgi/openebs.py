@@ -290,7 +290,7 @@ def openebs(environ, start_response):
                     return badrequest(start_response, 'Fout in UserStopCodes formaat')
             else:
                 if 'userstopcodes[]' not in post:
-                    return badrequest(start_response, 'UserStopCodes ontbreken')
+                    return badrequest(start_response, 'Er zijn geen haltes geselecteerd')
 
             if 'messagecontent' not in post:
                 return badrequest(start_response, 'Bericht ontbreekt')

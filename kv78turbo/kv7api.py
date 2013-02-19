@@ -25,7 +25,7 @@ line
 WHERE
 dataownercode = %s
 """,[dataownercode])
-    reply = {'BOAT' : [], 'TRAM' : [],'BUS' : []}
+    reply = {'METRO' : [], 'BOAT' : [], 'TRAM' : [],'BUS' : []}
 
     lines = cur.fetchall()
     cur.close()

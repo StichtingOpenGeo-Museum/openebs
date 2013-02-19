@@ -161,6 +161,7 @@ function patternSelectStopEach(element) {
     if (element.hasClass('btn-success')){
         feature.renderIntent = 'default';
         element.removeClass('btn-success');
+        element.removeClass('active');
         element.addClass('btn-primary');
         $("#stopBasket").find("#"+id).remove();
     } else {
@@ -168,6 +169,7 @@ function patternSelectStopEach(element) {
         $("#stopBasket").append('<option id="'+id+'">'+element.text()+' ('+id.split("_")[1] +')</option>');
         feature.renderIntent = 'select';
         element.addClass('btn-success');
+        element.addClass('active');
     }
 }
 
@@ -193,11 +195,11 @@ function patternSelectRow(element) {
 function patternSelect(index) {
         var selector = '';
         if (index == 0) {
-                selector = '.lijn .left > .btn[data-toggle="button"]';
+                selector = '.lijn .left > .btn-primary';
         } else if (index == 1) {
-                selector = '.lijn .right > .btn[data-toggle="button"]';
+                selector = '.lijn .right > .btn-primary';
         } else {
-                selector = '.lijn .btn[data-toggle="button"]';
+                selector = '.lijn .btn-primary';
         }
 
         $.each($(selector), function (i, v) { patternSelectStopEach(v) });
