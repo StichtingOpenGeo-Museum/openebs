@@ -159,7 +159,8 @@ function patternSelectStopEach(element) {
     var id = element.attr('id');
     var feature = getStopFeature(id);
     if (element.hasClass('btn-success')){
-        feature.renderIntent = 'default';
+        if (feature)
+            feature.renderIntent = 'default';
         element.removeClass('btn-success');
         element.removeClass('active');
         element.addClass('btn-primary');
@@ -167,7 +168,8 @@ function patternSelectStopEach(element) {
     } else {
         $("#stopBasket").find("#"+id).remove();
         $("#stopBasket").append('<option id="'+id+'">'+element.text()+' ('+id.split("_")[1] +')</option>');
-        feature.renderIntent = 'select';
+        if (feature)
+            feature.renderIntent = 'select';
         element.addClass('btn-success');
         element.addClass('active');
     }
