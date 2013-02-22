@@ -3,7 +3,7 @@ from datetime import time
 from datetime import datetime
 from datetime import timedelta
 
-import json
+import ujson as json
 import pytz
 import psycopg2
 import psycopg2.extras
