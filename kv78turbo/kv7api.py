@@ -1,7 +1,7 @@
 import uwsgi
 import psycopg2
 import psycopg2.extras
-import simplejson
+import ujson as json
 from operator import itemgetter
 from settings.const import kv78_database_connect
 
@@ -45,7 +45,7 @@ dataownercode = %s
         if len(reply[key]) == 0:
             del reply[key]
 
-    return simplejson.dumps(reply)
+    return json.dumps(reply)
 
 def querylinesperstop(dataownercode):
     conn = psycopg2.connect(kv78_database_connect)
@@ -72,7 +72,7 @@ group by jt.dataownercode,name,x,y,jt.userstopcodebegin
         del(row['id'])
     cur.close()
     conn.close()
-    return simplejson.dumps(reply)
+    return json.dumps(reply)
 
 
 def querystopinline(dataownercode,line):
@@ -111,4 +111,4 @@ jopa.journeypatterncode = jt.journeypatterncode
             del(row['id'])
     cur.close()
     conn.close()
-    return simplejson.dumps(reply)
+    return json.dumps(reply)
