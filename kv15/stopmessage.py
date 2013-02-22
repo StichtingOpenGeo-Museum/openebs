@@ -225,10 +225,10 @@ SELECT
 dataownercode,
 cast(messagecodedate as text),
 cast(messagecodenumber as int),
-(     SELECT string_agg(userstopcode, '|') as userstopcodes FROM kv15_stopmessage_userstopcode 
+(     SELECT array_agg(userstopcode) as userstopcodes FROM kv15_stopmessage_userstopcode 
 	WHERE dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate 
               and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
-(	SELECT string_agg(lineplanningnumber, '|') as lineplanningnumbers FROM kv15_stopmessage_lineplanningnumber 
+(	SELECT array_agg(lineplanningnumber) as lineplanningnumbers FROM kv15_stopmessage_lineplanningnumber 
 	WHERE dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate 
 		and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
 messagepriority, messagetype, messagedurationtype, 
@@ -243,10 +243,10 @@ UNION
 dataownercode,
 cast(messagecodedate as text),
 cast(messagecodenumber as int),
-(     SELECT string_agg(userstopcode, '|') as userstopcodes FROM kv15_stopmessage_userstopcode 
+(     SELECT array_agg(userstopcode) as userstopcodes FROM kv15_stopmessage_userstopcode 
 	WHERE dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate 
               and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
-(	SELECT string_agg(lineplanningnumber, '|') as lineplanningnumbers FROM kv15_stopmessage_lineplanningnumber 
+(	SELECT array_agg(lineplanningnumber) as lineplanningnumbers FROM kv15_stopmessage_lineplanningnumber 
 	WHERE dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate 
 		and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
 messagepriority, messagetype, messagedurationtype, 
@@ -261,9 +261,8 @@ ORDER by isactive DESC ,messagetimestamp DESC""", (dataownercode,dataownercode))
 
         output = cur.fetchall()
         for row in output:
-            row['userstopcodes'] = row['userstopcodes'].split('|')
-            if row['lineplanningnumbers'] is not None:
-                row['lineplanningnumbers'] = row['lineplanningnumbers'].split('|')
+	    if row['userstopcodes'] is None:
+                row['userstopcodes'] = []
         return json.dumps(output)
     
     def delete_scenario(self, dataownercode, scenario, conn=None):
@@ -286,21 +285,21 @@ ORDER by isactive DESC ,messagetimestamp DESC""", (dataownercode,dataownercode))
 
         if scenario is None:
             cur.execute("""select dataownercode, messagescenario,
-                        string_agg(userstopcodes, '|') as userstopcodes, string_agg(lineplanningnumbers, '|') as lineplanningnumbers
+                        array_agg(userstopcodes) as userstopcodes, array_agg(lineplanningnumbers) as lineplanningnumbers
                         from
                         (select dataownercode, messagecodedate, messagecodenumber, messagescenario,
-                        (select string_agg(userstopcode, '|') as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
-                        (select string_agg(lineplanningnumber, '|') as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber) from kv15_stopmessage where isdeleted = false and dataownercode = %s AND messagescenario IS NOT NULL) AS X GROUP BY dataownercode, messagescenario ORDER BY messagescenario;""", (dataownercode,));
+                        (select array_agg(userstopcode) as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
+                        (select array_agg(lineplanningnumber) as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber) from kv15_stopmessage where isdeleted = false and dataownercode = %s AND messagescenario IS NOT NULL) AS X GROUP BY dataownercode, messagescenario ORDER BY messagescenario;""", (dataownercode,));
         else:
             cur.execute("""
 SELECT 
 dataownercode,
 cast(messagecodedate as text),
 cast(messagecodenumber as int),
-(     SELECT string_agg(userstopcode, '|') as userstopcodes FROM kv15_stopmessage_userstopcode 
+(     SELECT array_agg(userstopcode) as userstopcodes FROM kv15_stopmessage_userstopcode 
 	WHERE dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate 
               and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
-(	SELECT string_agg(lineplanningnumber, '|') as lineplanningnumbers FROM kv15_stopmessage_lineplanningnumber 
+(	SELECT array_agg(lineplanningnumber) as lineplanningnumbers FROM kv15_stopmessage_lineplanningnumber 
 	WHERE dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate 
 		and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
 messagepriority, messagetype, messagedurationtype, 
@@ -313,9 +312,8 @@ WHERE isdeleted = FALSE AND dataownercode = %s AND messagescenario = %s;""", (da
 
         output = cur.fetchall()
         for row in output:
-            row['userstopcodes'] = row['userstopcodes'].split('|')
-            if row['lineplanningnumbers'] is not None:
-                row['lineplanningnumbers'] = row['lineplanningnumbers'].split('|')
+	    if row['userstopcodes'] is None:
+	        row['userstopcodes'] = []
 
 	if scenario is not None:
 	        return json.dumps({'messages': output})
