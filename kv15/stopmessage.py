@@ -284,12 +284,23 @@ ORDER by isactive DESC ,messagetimestamp DESC""", (dataownercode,dataownercode))
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
         if scenario is None:
-            cur.execute("""select dataownercode, messagescenario,
-                        array_agg(userstopcodes) as userstopcodes, array_agg(lineplanningnumbers) as lineplanningnumbers
-                        from
-                        (select dataownercode, messagecodedate, messagecodenumber, messagescenario,
-                        (select array_agg(userstopcode) as userstopcodes from kv15_stopmessage_userstopcode where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber),
-                        (select array_agg(lineplanningnumber) as lineplanningnumbers from kv15_stopmessage_lineplanningnumber where dataownercode = kv15_stopmessage.dataownercode and messagecodedate = kv15_stopmessage.messagecodedate and messagecodenumber = kv15_stopmessage.messagecodenumber group by dataownercode, messagecodedate, messagecodenumber) from kv15_stopmessage where isdeleted = false and dataownercode = %s AND messagescenario IS NOT NULL) AS X GROUP BY dataownercode, messagescenario ORDER BY messagescenario;""", (dataownercode,));
+            cur.execute("""
+SELECT
+msgs.dataownercode,
+messagescenario,
+array_agg(distinct userstopcode) as userstopcodes,
+array_agg(distinct lineplanningnumber) as lineplanningnumbers
+FROM kv15_stopmessage_userstopcode as stops,  kv15_stopmessage as msgs LEFT JOIN kv15_stopmessage_lineplanningnumber as linenumbers USING 
+(dataownercode,messagecodedate,messagecodenumber)
+WHERE
+msgs.dataownercode = stops.dataownercode AND 
+msgs.messagecodedate = stops.messagecodedate AND
+msgs.messagecodenumber = stops.messagecodenumber AND
+isdeleted = false AND
+msgs.dataownercode = %s AND
+messagescenario IS NOT NULL
+GROUP BY msgs.dataownercode, messagescenario
+ORDER BY messagescenario""", (dataownercode,));
         else:
             cur.execute("""
 SELECT 
@@ -314,7 +325,8 @@ WHERE isdeleted = FALSE AND dataownercode = %s AND messagescenario = %s;""", (da
         for row in output:
 	    if row['userstopcodes'] is None:
 	        row['userstopcodes'] = []
-
+            if row['lineplanningnumbers'] is not None and len(row['lineplanningnumbers']) > 0 and row['lineplanningnumbers'][0] is None:
+                row['lineplanningnumbers'] = None
 	if scenario is not None:
 	        return json.dumps({'messages': output})
 	
