@@ -127,18 +127,20 @@ function updateScenario() {
 }
 
 function kv15deletescenario(scenarioname) {
-     var post = {
-        "scenarioname": scenarioname
+    if (!confirmdelete || confirm('Weet u zeker dat u "'+scenarioname+'"wilt verwijderen?')) {
+        var post = {
+            "scenarioname": scenarioname
+        }
+        $.ajax({type: "POST", url: "/KV15deletescenarios", data: post, dataType: "html"})
+        .done(function (data) {
+            $("#scenarioAlert").removeClass('alert alert-error');
+            $("#scenarioAlert").html('');
+            updateScenario();
+        })
+        .fail(function (data) {
+            $("#scenarioAlert").replaceWith('<div id="berichtenAlert" class="alert alert-error"><b>Waarschuwing</b> '+data.responseText+'</div>');
+        });
      }
-     $.ajax({type: "POST", url: "/KV15deletescenarios", data: post, dataType: "html"})
-     .done(function (data) {
-     	$("#scenarioAlert").removeClass('alert alert-error');
-		$("#scenarioAlert").html('');
-        updateScenario();
-     })
-     .fail(function (data) {
-		$("#scenarioAlert").replaceWith('<div id="berichtenAlert" class="alert alert-error"><b>Waarschuwing</b> '+data.responseText+'</div>');
-     });
 }
 
 function kv15planning(scenario) {
@@ -160,20 +162,28 @@ function kv15scenario(scenario) {
 }
 
 function kv15deletemessage(dataownercode, messagecodedate, messagecodenumber) {
-	var post = {
-		"dataownercode": dataownercode,
-		"messagecodedate": messagecodedate,
-		"messagecodenumber": messagecodenumber
-	}
-	$.ajax({type: "POST", url: "/KV15deletemessages", data: post, dataType: "html"})
-	.done(function () {
-  		$("#berichtenAlert").removeClass('alert alert-error');
-		$("#berichtenAlert").html('');
-		updateBerichten(); 
-	})
-	.fail(function (data) {
-		$("#berichtenAlert").replaceWith('<div id="berichtenAlert" class="alert alert-error"><b>Waarschuwing</b> Verwijderen is niet gelukt.<br />'+data.responseText+'</div>');
-	});
+    var bericht = berichten[[dataownercode, messagecodedate, messagecodenumber].join('_')];
+    if (bericht !== undefined) {
+        bericht = ' "'+bericht['messagecontent']+'"';
+    } else {
+        bericht = '';
+    }
+    if (!confirmdelete || confirm('Weet u zeker dat u het bericht'+bericht+' wilt verwijderen?')) {
+        var post = {
+            "dataownercode": dataownercode,
+            "messagecodedate": messagecodedate,
+            "messagecodenumber": messagecodenumber
+        }
+        $.ajax({type: "POST", url: "/KV15deletemessages", data: post, dataType: "html"})
+        .done(function () {
+            $("#berichtenAlert").removeClass('alert alert-error');
+            $("#berichtenAlert").html('');
+            updateBerichten(); 
+        })
+        .fail(function (data) {
+            $("#berichtenAlert").replaceWith('<div id="berichtenAlert" class="alert alert-error"><b>Waarschuwing</b> Verwijderen is niet gelukt.<br />'+data.responseText+'</div>');
+        });
+    }
 }
 
 function herplanBericht(dataownercode, messagecodedate, messagecodenumber) {
