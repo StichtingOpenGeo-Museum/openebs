@@ -319,6 +319,8 @@ def openebs(environ, start_response):
             if 'messageendtime' in post:
                 try:
                     msg.messageendtime = datetime.strptime(post['messageendtime'].value, '%Y-%m-%dT%H:%M:%S')
+                    if msg.messageendtime < (datetime.now() - timedelta(minutes=5)):
+                        return badrequest(start_response, 'MessageEndTime kan niet in het verleden liggen')                    
                 except:
                     return badrequest(start_response, 'MessageEndTime kan niet worden gevalideerd')
 
