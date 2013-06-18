@@ -9,6 +9,10 @@ $(document).ready(function() {
             $("#auth_messagescenario").attr('style', '');
         }
         $("#username").html(authorization['username']);
+
+        if (authorization['center_x'] && authorization['center_y'] && authorization['center_z']) {
+            map.setCenter(new OpenLayers.LonLat(authorization['center_x'], authorization['center_y']), authorization['center_z']);
+        }
     });
 
     initopenlayers();
@@ -148,6 +152,32 @@ $('#messagescenario').keyup(function() {
         $("#messageSubmit").text('Opslaan');
     }
 });
+
+String.prototype.lpad = function(padString, length) {
+    var str = this;
+    while (str.length < length)
+        str = padString + str;
+    return str;
+}
+
+$( '#messageendofshift' ).on( 'click', function() {
+    var xmldate = datetimetoxml($('#messagestarttime').val())
+    arr = xmldate.split('T');
+    time_parts = arr[1].split(':');
+    hour = parseInt(time_parts[0]);
+    var date = new Date(Date.parse(xmldate));
+    end_of_shift = authorization['end_of_shift'];
+    if (hour > end_of_shift){
+        date.setDate(date.getDate() + 1);
+    }
+    date.setHours(end_of_shift);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    days_part = date.getDate().toString().lpad("0",2)+'-'+(date.getMonth()+1).toString().lpad("0",2)+'-'+(date.getYear()+1900);
+    time_part = date.getHours().toString().lpad("0",2)+':'+date.getMinutes().toString().lpad("0",2);
+    $('#messageendtime').attr( "value", days_part+' '+time_part);
+});
+
 
 $( '#messageSubmit' ).on( 'click', function () {
     var post = {
