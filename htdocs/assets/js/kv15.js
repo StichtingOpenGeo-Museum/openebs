@@ -21,7 +21,12 @@ function userStopCodesInBasket(){
 function datetimetoxml(datetime) {
     var arr = datetime.split(' ');
     date_parts = arr[0].split('-');
-    return [date_parts[2], date_parts[1], date_parts[0]].join('-') + 'T' + arr[1];
+    time_parts = arr[1].split(':');
+    if (time_parts.length == 2){
+        return [date_parts[2], date_parts[1], date_parts[0]].join('-') + 'T' + time_parts[0]+':'+time_parts[1]+':00';
+    }else{
+        return [date_parts[2], date_parts[1], date_parts[0]].join('-') + 'T' + arr[1];
+    }
 }
 
 function haltesBericht(dataownercode, messagecodedate, messagecodenumber) {
