@@ -130,6 +130,8 @@ $( '#btnAlleHaltes' ).on( 'click', function() {
     refreshMap();
 });
 
+var herplan = false;
+
 // When the modal view is showed, the basket is updated
 $('#nieuwBerichtModal').on('show', function () {
     var selectedFeatures = getSelectedFeatures();
