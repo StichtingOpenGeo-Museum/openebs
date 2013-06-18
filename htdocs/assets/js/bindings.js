@@ -139,6 +139,19 @@ $('#nieuwBerichtModal').on('show', function () {
         $("#stopBasket").append('<option id="'+feature.attributes.key+'">'+feature.attributes.name+' ('+feature.attributes.key.split("_")[1] +')</option>');
     }
     updateBerichten();
+    if (herplan){
+        herplan = false;
+    }else{
+        herplan = false;
+        var date = new Date();
+        days_part = date.getDate().toString().lpad("0",2)+'-'+(date.getMonth()+1).toString().lpad("0",2)+'-'+(date.getYear()+1900);
+        time_part = date.getHours().toString().lpad("0",2)+':'+date.getMinutes().toString().lpad("0",2);
+        $('#messagestarttime').attr( "value", days_part+' '+time_part);
+        date.setUTCHours(date.getUTCHours()+2);
+        days_part = date.getDate().toString().lpad("0",2)+'-'+(date.getMonth()+1).toString().lpad("0",2)+'-'+(date.getYear()+1900);
+        time_part = date.getHours().toString().lpad("0",2)+':'+date.getMinutes().toString().lpad("0",2);
+        $('#messageendtime').attr( "value", days_part+' '+time_part);
+    }
 });
 
 $('#messagescenario').keyup(function() {
