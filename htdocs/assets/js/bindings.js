@@ -132,6 +132,17 @@ $( '#btnAlleHaltes' ).on( 'click', function() {
 
 var herplan = false;
 
+$('#nieuwScenarioModal').on('show', function () {
+    var date = new Date();
+    days_part = date.getDate().toString().lpad("0",2)+'-'+(date.getMonth()+1).toString().lpad("0",2)+'-'+(date.getYear()+1900);
+    time_part = date.getHours().toString().lpad("0",2)+':'+date.getMinutes().toString().lpad("0",2);
+    $('#scenariostarttime').attr( "value", days_part+' '+time_part);
+    date.setUTCHours(date.getUTCHours()+2);
+    days_part = date.getDate().toString().lpad("0",2)+'-'+(date.getMonth()+1).toString().lpad("0",2)+'-'+(date.getYear()+1900);
+    time_part = date.getHours().toString().lpad("0",2)+':'+date.getMinutes().toString().lpad("0",2);
+    $('#scenarioendtime').attr( "value", days_part+' '+time_part);
+});
+
 // When the modal view is showed, the basket is updated
 $('#nieuwBerichtModal').on('show', function () {
     var selectedFeatures = getSelectedFeatures();
